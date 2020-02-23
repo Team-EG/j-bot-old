@@ -14,20 +14,27 @@ class ServerSetup(commands.Cog):
         if guild is None:
             return
 
+        with open('botsetup.json', 'r') as f:
+            prefix_data = json.load(f)
+
         guild_id = str(guild.id)
 
-        await guild.create_category('제이봇')
+        bot_name = str(prefix_data["bot_name"])
+
+        default_prefix = str(prefix_data["default prefix"])
+
+        await guild.create_category(bot_name)
         time.sleep(1)
-        name = '제이봇'
+        name = bot_name
         category = discord.utils.get(guild.categories, name=name)
         await guild.create_text_channel('환영합니다', category=category)
-        await guild.create_role(name="굴라크", colour=discord.Colour(0xff0000))
+        # await guild.create_role(name="굴라크", colour=discord.Colour(0xff0000))
         time.sleep(1)
         channelname = '환영합니다'
         channel = discord.utils.get(guild.text_channels, name=channelname)
-        await channel.send('안녕하세요! 저는 제이봇입니다! 명령어에 대한 도움이 필요하다면 "제이봇 도움" 이라고 말해주세요!'
+        await channel.send(f'안녕하세요! 저는 {bot_name}입니다! 명령어에 대한 도움이 필요하다면 "{default_prefix}도움" 이라고 말해주세요!'
                            '\nP.S. 이 채널은 환영메시지를 보내는 채널입니다!'
-                           '\n채널을 변경하고 싶으시다면 제이봇 환영채널 [채널_이름] 이라고 말해주세요!')
+                           f'\n채널을 변경하고 싶으시다면 {default_prefix}환영채널 [채널_이름] 이라고 말해주세요!')
         with open("data/guildsetup.json", "r") as f:
             data = json.load(f)
 
@@ -36,8 +43,8 @@ class ServerSetup(commands.Cog):
         data[guild_id]['greetings'] = '님이 서버에 들어오셨어요!'
         data[guild_id]['goodbye'] = '님이 서버에서 나가셨어요...'
         data[guild_id]['greetpm'] = None
-        data[guild_id]['prefixes'] = '제이봇 '
-        data[guild_id]['talk_prefixes'] = '제이야 '
+        data[guild_id]['prefixes'] = str(prefix_data["default prefix"])
+        data[guild_id]['talk_prefixes'] = str(prefix_data["talk prefix"])
         data[guild_id]['use_globaldata'] = True
         data[guild_id]['use_level'] = True
         data[guild_id]['use_antispam'] = True

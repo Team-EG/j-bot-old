@@ -1,7 +1,8 @@
 {
     "stabletoken": "",
     "canarytoken": "",
-    "bot_name": "\uc81c\uc774\ubd07",
-    "default prefix": "\uc81c\uc774\ubd07 ",
-    "stable or canary?": "canary"
+    "bot_name": "",
+    "default prefix": "",
+    "talk prefix": "",
+    "stable or canary?": ""
 }

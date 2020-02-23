@@ -24,11 +24,13 @@ if token_data['stabletoken'] == "":
     choose = input('Stable or Canary? : ')
     bot_name = input('Bot Name? : ')
     default_prefix = input('Default Prefix? : ')
+    talk_prefix = input('Talk Prefix? : ')
     token_data['stabletoken'] = str(stable)
     token_data["canarytoken"] = str(canary)
     token_data["stable or canary?"] = str(choose)
     token_data['bot_name'] = str(bot_name)
     token_data['default prefix'] = str(default_prefix)
+    token_data['talk prefix'] = str(talk_prefix)
     if canary is None:
         del token_data['canarytoken']
     print('정보 입력 완료!')
