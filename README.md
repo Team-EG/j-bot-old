@@ -1,7 +1,7 @@
 # j-bot
 WIP Project
 
-To do list:
+To do list:  
 Fix music.py cog (loop doesn't exit) 
 Add some easteregg  
 Finish botsetup.json and related codes  
