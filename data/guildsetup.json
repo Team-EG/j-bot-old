@@ -1,0 +1,26 @@
+{
+    "653865550157578251": {
+        "welcomechannel": "\ud658\uc601\ud569\ub2c8\ub2e4",
+        "greetings": "\ub2d8\uc774 \uc11c\ubc84\uc5d0 \ub4e4\uc5b4\uc624\uc168\uc5b4\uc694!",
+        "goodbye": "\ub2d8\uc774 \uc11c\ubc84\uc5d0\uc11c \ub098\uac00\uc168\uc5b4\uc694...",
+        "greetpm": null,
+        "prefixes": "\uc81c\uc774\ubd07 ",
+        "talk_prefixes": "\uc81c\uc774\uc57c ",
+        "use_globaldata": true,
+        "use_level": true,
+        "use_antispam": true,
+        "template": true
+    },
+    "653239530928996362": {
+        "welcomechannel": "\ud658\uc601\ud569\ub2c8\ub2e4",
+        "greetings": "\ub2d8\uc774 \uc11c\ubc84\uc5d0 \ub4e4\uc5b4\uc624\uc168\uc5b4\uc694!",
+        "goodbye": "\ub2d8\uc774 \uc11c\ubc84\uc5d0\uc11c \ub098\uac00\uc168\uc5b4\uc694...",
+        "greetpm": null,
+        "prefixes": "\uc81c\uc774\ubd07 ",
+        "talk_prefixes": "\uc81c\uc774\uc57c ",
+        "use_globaldata": true,
+        "use_level": true,
+        "use_antispam": true,
+        "template": true
+    }
+}
