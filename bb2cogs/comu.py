@@ -13,14 +13,23 @@ class Communication(commands.Cog):
 
     # 유저가 입력한 데이터 강제 삭제
     @commands.command()
+    @commands.has_permissions(ban_members=True)
     async def 강제삭제(self, ctx, question=None):
-        if ctx.author.id == 288302173912170497:
-            pass  # 봇 주인만 사용가능
-        else:
-            await ctx.send("권한이 없습니다.")
-            return
-        with open(f"data/data.json", "r") as f:
-            qna_data = json.load(f)
+        guild_id = str(ctx.guild.id)
+        # 길드 전용 데이터베이스를 로드할건지 모든 서버에 연결된 데이터베이스에 연결할건지 결정
+        with open("data/guildsetup.json", "r") as f:
+            data = json.load(f)
+            if data[guild_id]['use_globaldata'] is True:
+                with open(f"data/data.json", "r") as f:
+                    qna_data = json.load(f)
+                if ctx.author.id == 288302173912170497:
+                    pass  # 봇 주인만 사용가능
+                else:
+                    await ctx.send("권한이 없습니다.")
+                    return
+            else:
+                with open(f"data/guild_data/{guild_id}/data.json", "r") as a:
+                    qna_data = json.load(a)
         if str(question) in qna_data:
             del qna_data[f'{question}']
             with open(f"data/data.json", "w") as s:
@@ -189,7 +198,7 @@ class Communication(commands.Cog):
                              '음...',
                              '(당황)',
                              f'"{question}"이(가) 뭐죠..?',
-                             '~~그런건 크X봇한ㅌ...읍읍~~']
+                             '~~그런건 다른 봇한ㅌ...읍읍~~']
                 await message.channel.send(f'{random.choice(responses)}')
 
 

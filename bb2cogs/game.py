@@ -24,7 +24,7 @@ class Game(commands.Cog):
         await ctx.send('계정이 생성되었습니다. 통장 잔고는 0원 입니다.')
 
     @commands.command()
-    async def 일한다(self, ctx):
+    async def 알바하자(self, ctx):
         guild_id = str(ctx.guild.id)
         author_id = str(ctx.author.id)
         with open(f'game/money.json', 'r') as f:

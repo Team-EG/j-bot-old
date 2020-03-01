@@ -1,4 +1,3 @@
-import json
 import discord
 import os
 import youtube_dl
@@ -27,33 +26,15 @@ class Music(commands.Cog):
         def check_queues():
             if voice and voice.is_connected():
                 time.sleep(1)
-                song_exist = os.path.isfile(f"music/{guild_id}/song.mp3")
                 try:
                     path = f"./music/{guild_id}/Queue"
                     file_list = os.listdir(path)
                     file_list_mp3 = [file for file in file_list if file.endswith(".mp3")]
-                    if file_list_mp3 is None or False and song_exist is None or False:
-                        with open(f"music/{guild_id}/queue.json", 'r') as f:
-                            queue_data = json.load(f)
-
-                        del queue_data['playing']
-
-                        with open(f"music/{guild_id}/queue.json", 'w') as f:
-                            json.dump(queue_data, f, indent=4)
+                    song_exist = os.path.isfile(f"music/{guild_id}/song.mp3")
+                    if file_list_mp3 is None and song_exist is False:
                         return
-                    elif file_list_mp3 is None or False:
-                        try:
-                            os.remove(f"music/{guild_id}/song.mp3")
-                            with open(f"music/{guild_id}/queue.json", 'r') as f:
-                                queue_data = json.load(f)
-
-                            del queue_data['playing']
-
-                            with open(f"music/{guild_id}/queue.json", 'w') as f:
-                                json.dump(queue_data, f, indent=4)
-                            return
-                        except:
-                            pass
+                    elif file_list_mp3 is None:
+                        pass
                     else:
                         try:
                             result = min(file_list_mp3)
@@ -65,16 +46,6 @@ class Music(commands.Cog):
                                     voice.play(discord.FFmpegPCMAudio(f"music/{guild_id}/song.mp3"))
                                     voice.source = discord.PCMVolumeTransformer(voice.source)
                                     voice.source.volume = 1
-
-                                    with open(f"music/{guild_id}/queue.json", 'r') as f:
-                                        queue_data = json.load(f)
-
-                                    queue_data['playing'] = queue_data[str(result[:-4])]
-                                    del queue_data[str(result[:-4])]
-
-                                    with open(f"music/{guild_id}/queue.json", 'w') as f:
-                                        json.dump(queue_data, f, indent=4)
-
                                     check_queues()
                                 except:
                                     pass
@@ -84,13 +55,6 @@ class Music(commands.Cog):
                     pass
                 check_queues()
             else:
-                with open(f"music/{guild_id}/queue.json", 'r') as f:
-                    queue_data = json.load(f)
-
-                del queue_data['playing']
-
-                with open(f"music/{guild_id}/queue.json", 'w') as f:
-                    json.dump(queue_data, f, indent=4)
                 return
 
         song_exist = os.path.isfile(f"music/{guild_id}/song.mp3")
@@ -150,23 +114,9 @@ class Music(commands.Cog):
 
         title = ydl.extract_info(url, download=False).get('title', None)
         await ctx.send(f'"{title}"을(를) 재생할께요!')
-        with open('botsetup.json', 'r') as f:
-            data = json.load(f)
-            prefix = data['default prefix']
-        await self.client.change_presence(status=discord.Status.online,
-                                          activity=discord.Game(f'"{prefix}도움"이라고 말해보세요!'))
+        await self.client.change_presence(status=discord.Status.online, activity=discord.Game('"제이봇 도움"이라고 말해보세요!'))
         background_thread = Thread(target=check_queues)
         background_thread.start()
-
-        shutil.copy('music/queue.json', f"music/{guild_id}/queue.json")
-        with open(f"music/{guild_id}/queue.json", 'r') as f:
-            queue_data = json.load(f)
-
-        # currenttime = time.strftime("%Y%m%d%H%M%S")
-        queue_data['playing'] = title
-
-        with open(f"music/{guild_id}/queue.json", 'w') as f:
-            json.dump(queue_data, f, indent=4)
 
     @commands.command(pass_context=True)
     async def 들어와(self, ctx):
@@ -277,10 +227,6 @@ class Music(commands.Cog):
 
     @commands.command(pass_context=True)
     async def 대기(self, ctx, url: str):
-        if 'list=' in url:
-            await ctx.send('이 링크는 재생목록이네요... 대기 리스트 추가가 취소되었습니다.')
-            return
-
         await ctx.send('잠시만 기다려주세요...')
         await self.client.change_presence(status=discord.Status.dnd,
                                           activity=discord.Game('저 지금 바빠요! (뮤직 다운로드중)'))
@@ -311,39 +257,8 @@ class Music(commands.Cog):
 
                 title = ydl.extract_info(url, download=False).get('title', None)
                 await ctx.send(f"{title}을(를) 대기 리스트에 넣었어요!")
-                with open('botsetup.json', 'r') as f:
-                    data = json.load(f)
-                    prefix = data['default prefix']
                 await self.client.change_presence(status=discord.Status.online,
-                                                  activity=discord.Game(f'"{prefix}도움"이라고 말해보세요!'))
-
-                with open(f"music/{guild_id}/queue.json", 'r') as f:
-                    queue_data = json.load(f)
-
-                queue_data[str(currenttime)] = title
-
-                with open(f"music/{guild_id}/queue.json", 'w') as f:
-                    json.dump(queue_data, f, indent=4)
-
-    @commands.command()
-    async def 대기리스트(self, ctx):
-        guild_id = ctx.message.guild.id
-        with open(f"music/{guild_id}/queue.json", 'r') as f:
-            queue_data = json.load(f)
-
-        playing = queue_data['playing']
-        qdata = queue_data.keys()
-        try:
-            embed = discord.Embed(title='대기 리스트', description=f'{ctx.guild.name}', colour=discord.Color.red())
-            embed.add_field(name='재생중', value=f'{playing}', inline=False)
-            for key in qdata:
-                if key == 'playing':
-                    pass
-                else:
-                    embed.add_field(name='대기중', value=f'{queue_data[key]}', inline=False)
-            await ctx.send(embed=embed)
-        except KeyError:
-            await ctx.send('대기중인 음악이 없습니다.')
+                                                  activity=discord.Game('"제이봇 도움"이라고 말해보세요!'))
 
 
 def setup(client):

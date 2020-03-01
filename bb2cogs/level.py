@@ -153,8 +153,7 @@ class Level(commands.Cog):
             return
         else:
             if message.content.startswith(""):
-                if message.content.startswith(f"{data[guild_id]['prefixes']}"):
-                    return
+
                 xp_data_exist = os.path.isfile(f"level/{guild_id}/xp.json")
                 if xp_data_exist:
                     pass
@@ -165,94 +164,97 @@ class Level(commands.Cog):
                 with open(f"level/{guild_id}/xp.json", "r") as f:
                     xp_data = json.load(f)
 
-                    xp_choice = [5, 10, 15, 20, 25]
+                xp_choice = [5, 10, 15, 20, 25]
 
-                    currenttime = time.strftime('%Y%m%d%H%M%S')
+                currenttime = time.strftime('%Y%m%d%H%M%S')
 
-                    if not author_id in xp_data:
-                        xp_data[author_id] = {}
+                if not author_id in xp_data:
+                    xp_data[author_id] = {}
+                    xp_data[author_id]["exp"] = 0
+                    xp_data[author_id]["lvl"] = 1
+                    xp_data[author_id]["spam_count"] = 0
+                    xp_data[author_id]["warn"] = 0
+                    xp_data[author_id]["last_msg"] = int(currenttime)
+                    xp_data[author_id]["last_spam"] = int(currenttime)
+                    xp_data[author_id]["kick_count"] = 0
+                else:
+                    pass
+
+                with open(f"level/{guild_id}/xp.json", "w") as s:
+                    json.dump(xp_data, s, indent=4)
+
+                timepassed = int(currenttime) - int(xp_data[author_id]["last_msg"])
+                spamtimepassed = int(currenttime) - int(xp_data[author_id]["last_spam"])
+                if timepassed <= 100:
+                    if spamtimepassed <= 100:
+                        with open("data/guildsetup.json", "r") as f:
+                            data = json.load(f)
+                        if data[guild_id]['use_antispam'] is True:
+                            pass
+                        else:
+                            return
+                    else:
+                        return
+                    xp_data[author_id]["spam_count"] += 1
+                    xp_data[author_id]["last_spam"] = int(currenttime)
+
+                    if xp_data[author_id]["spam_count"] == 15:
+                        await message.channel.send(f"{message.author.mention} 도배 경고")
+
+                    elif xp_data[author_id]["spam_count"] == 30:
+                        await message.channel.send(f"{message.author.mention} 도베로 인해 XP가 초기화되었습니다.")
+                        xp_data[author_id]["exp"] = 0
+                        xp_data[author_id]["lvl"] = 1
+                        xp_data[author_id]["spam_count"] = 0
+                        xp_data[author_id]["warn"] += 1
+
+                    elif xp_data[author_id]["warn"] == 3:
                         xp_data[author_id]["exp"] = 0
                         xp_data[author_id]["lvl"] = 1
                         xp_data[author_id]["spam_count"] = 0
                         xp_data[author_id]["warn"] = 0
-                        xp_data[author_id]["last_msg"] = int(currenttime)
-                        xp_data[author_id]["last_spam"] = int(currenttime)
-                        xp_data[author_id]["kick_count"] = 0
-                    else:
-                        pass
-
-                    with open(f"level/{guild_id}/xp.json", "w") as s:
-                        json.dump(xp_data, s, indent=4)
-
-                    timepassed = int(currenttime) - int(xp_data[author_id]["last_msg"])
-                    spamtimepassed = int(currenttime) - int(xp_data[author_id]["last_spam"])
-                    if timepassed <= 100:
-                        if spamtimepassed <= 100:
-                            with open("data/guildsetup.json", "r") as f:
-                                data = json.load(f)
-                            if data[guild_id]['use_antispam'] is True:
-                                pass
-                            else:
-                                return
-                        else:
+                        xp_data[author_id]["kick_count"] += 1
+                        if xp_data[author_id]["kick_count"] == 3:
+                            await message.channel.send(f"{message.author}님이 추방 횟수 누적으로 밴되었습니다.")
+                            del xp_data[author_id]
+                            await message.author.send('추방 횟수 누적으로 밴되었습니다.')
+                            await message.author.send('https://www.youtube.com/watch?v=3vAC_3jGpKo')
+                            await message.author.ban(reason=None)
                             return
-                        xp_data[author_id]["spam_count"] += 1
-                        xp_data[author_id]["last_spam"] = int(currenttime)
+                        await message.channel.send(f"{message.author}님이 도배 경고 누적으로 인해 추방되었습니다.")
+                        await message.author.send(f'도배 경고 누적으로 인해 추방되었습니다.')
+                        await message.author.kick(reason=None)
 
-                        if xp_data[author_id]["spam_count"] == 15:
-                            await message.channel.send(f"{message.author.mention} 도배 경고")
-
-                        elif xp_data[author_id]["spam_count"] == 30:
-                            await message.channel.send(f"{message.author.mention} 도베로 인해 XP가 초기화되었습니다.")
-                            xp_data[author_id]["exp"] = 0
-                            xp_data[author_id]["lvl"] = 1
-                            xp_data[author_id]["spam_count"] = 0
-                            xp_data[author_id]["warn"] += 1
-
-                        elif xp_data[author_id]["warn"] == 3:
-                            xp_data[author_id]["exp"] = 0
-                            xp_data[author_id]["lvl"] = 1
-                            xp_data[author_id]["spam_count"] = 0
-                            xp_data[author_id]["warn"] = 0
-                            xp_data[author_id]["kick_count"] += 1
-                            if xp_data[author_id]["kick_count"] == 3:
-                                await message.channel.send(f"{message.author}님이 추방 횟수 누적으로 밴되었습니다.")
-                                del xp_data[author_id]
-                                await message.author.send('추방 횟수 누적으로 밴되었습니다.')
-                                await message.author.send('https://www.youtube.com/watch?v=3vAC_3jGpKo')
-                                await message.author.ban(reason=None)
-                                return
-                            await message.channel.send(f"{message.author}님이 도배 경고 누적으로 인해 추방되었습니다.")
-                            await message.author.send(f'도배 경고 누적으로 인해 추방되었습니다.')
-                            await message.author.kick(reason=None)
-
-                        else:
-                            pass
-
-                        with open(f"level/{guild_id}/xp.json", "w") as s:
-                            json.dump(xp_data, s, indent=4)
-                        return
                     else:
                         pass
 
-                    xp_data[author_id]["exp"] += random.choice(xp_choice)
-                    xp_data[author_id]["spam_count"] = 0
-                    xp_data[author_id]["last_msg"] = int(currenttime)
-                    xp_data[author_id]["last_spam"] = int(currenttime)
-
                     with open(f"level/{guild_id}/xp.json", "w") as s:
                         json.dump(xp_data, s, indent=4)
+                    return
+                else:
+                    pass
 
-                    lvl_up_req = 200 + 50 * xp_data[author_id]["lvl"] * xp_data[author_id]["lvl"]
+                if message.content.startswith(f"{data[guild_id]['prefixes']}"):
+                    return
 
-                    if xp_data[author_id]["exp"] >= lvl_up_req:
-                        xp_data[author_id]["lvl"] += 1
-                        xp_data[author_id]["exp"] = 0
-                        await message.channel.send(
-                            f'{message.author.mention}님이 {xp_data[author_id]["lvl"]}레벨을 달성하셨습니다!')
+                xp_data[author_id]["exp"] += random.choice(xp_choice)
+                xp_data[author_id]["spam_count"] = 0
+                xp_data[author_id]["last_msg"] = int(currenttime)
+                xp_data[author_id]["last_spam"] = int(currenttime)
 
-                        with open(f"level/{guild_id}/xp.json", "w") as a:
-                            json.dump(xp_data, a, indent=4)
+                with open(f"level/{guild_id}/xp.json", "w") as s:
+                    json.dump(xp_data, s, indent=4)
+
+                lvl_up_req = 200 + 50 * xp_data[author_id]["lvl"] * xp_data[author_id]["lvl"]
+
+                if xp_data[author_id]["exp"] >= lvl_up_req:
+                    xp_data[author_id]["lvl"] += 1
+                    xp_data[author_id]["exp"] = 0
+                    await message.channel.send(
+                        f'{message.author.mention}님이 {xp_data[author_id]["lvl"]}레벨을 달성하셨습니다!')
+
+                    with open(f"level/{guild_id}/xp.json", "w") as a:
+                        json.dump(xp_data, a, indent=4)
 
 
 def setup(client):

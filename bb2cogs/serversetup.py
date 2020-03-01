@@ -24,15 +24,17 @@ class ServerSetup(commands.Cog):
         default_prefix = str(prefix_data["default prefix"])
 
         await guild.create_category(bot_name)
+        perms = discord.Permissions(send_messages=False)
+        await guild.create_role(name="뮤트", colour=discord.Colour(0xff0000), permissions=perms)
         time.sleep(1)
         name = bot_name
         category = discord.utils.get(guild.categories, name=name)
         await guild.create_text_channel('환영합니다', category=category)
-        # await guild.create_role(name="굴라크", colour=discord.Colour(0xff0000))
+        await guild.create_text_channel('서버로그', category=category)
         time.sleep(1)
         channelname = '환영합니다'
         channel = discord.utils.get(guild.text_channels, name=channelname)
-        await channel.send(f'안녕하세요! 저는 {bot_name}입니다! 명령어에 대한 도움이 필요하다면 "{default_prefix}도움" 이라고 말해주세요!'
+        await channel.send(f'{bot_name}을 이 서버에 초대해주셔서 감사합니다. 명령어에 대한 도움이 필요하다면 "{default_prefix}도움" 이라고 말해주세요!'
                            '\nP.S. 이 채널은 환영메시지를 보내는 채널입니다!'
                            f'\n채널을 변경하고 싶으시다면 {default_prefix}환영채널 [채널_이름] 이라고 말해주세요!')
         with open("data/guildsetup.json", "r") as f:
@@ -48,10 +50,21 @@ class ServerSetup(commands.Cog):
         data[guild_id]['use_globaldata'] = True
         data[guild_id]['use_level'] = True
         data[guild_id]['use_antispam'] = True
+        data[guild_id]['log_channel'] = '서버로그'
         data[guild_id]['template'] = True
 
         with open("data/guildsetup.json", "w") as s:
             json.dump(data, s, indent=4)
+
+        await guild.owner.send(f'{guild.name}에 이 봇을 초대해주셔서 감사합니다.'
+                               f'\n번거로우시겠지만, 기본적인 설정 한가지가 필요합니다.'
+                               f'\n지금 서버를 화인해보시면, "뮤트"라는 역할이 생성되있을 것입니다.'
+                               f'\n봇의 한계로, 채널에 역할 설정을 하는 것이 불가능합니다.'
+                               f'\n모든 텍스트 채널 권한에 "뮤트"역할을 추가해주시고, "메시지 보내기"를 X로 바꿔주세요.'
+                               f'\n꼭 이것을 해야지만 뮤트 명령어가 제대로 작동합니다.'
+                               f'\n다만, 만약에 이 기능이 필요없다면 안해주셔도 상관없습니다.'
+                               f'\n나중에라도 이 설정을 자동으로 할 수 있도록 하겠습니다.'
+                               f'\n감사합니다. -{bot_name}-')
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
@@ -75,6 +88,10 @@ class ServerSetup(commands.Cog):
                 greets = json.load(f)
             name = greets[guild_id]['welcomechannel']
             channel = discord.utils.get(member.guild.text_channels, name=name)
+            if name is None:
+                return
+            if channel is None:
+                return
             await channel.send(f"{member.mention}" + greets[guild_id]['greetings'])
             if greets[guild_id]['greetpm'] is None:
                 return
@@ -92,7 +109,11 @@ class ServerSetup(commands.Cog):
             with open("data/guildsetup.json", "r") as f:
                 greets = json.load(f)
             name = greets[guild_id]['welcomechannel']
+            if name is None:
+                return
             channel = discord.utils.get(member.guild.text_channels, name=name)
+            if channel is None:
+                return
             await channel.send(f'{member.display_name}' + greets[guild_id]['goodbye'])
         except Exception:
             pass
@@ -104,7 +125,15 @@ class ServerSetup(commands.Cog):
             return
         guild_id = str(ctx.guild.id)
         if channel is None:
-            await ctx.send('채널 이름을 입력해주세요.')
+            try:
+                with open("data/guildsetup.json", "r") as f:
+                    greets = json.load(f)
+                greets[guild_id]['welcomechannel'] = None
+                with open("data/guildsetup.json", "w") as s:
+                    json.dump(greets, s, indent=4)
+                await ctx.send(f'더이상 환영 메시지를 보내지 않습니다.')
+            except Exception as ex:
+                await ctx.send(f'오류 - {ex}')
         else:
             try:
                 channel = discord.utils.get(ctx.guild.text_channels, name=channel)
@@ -124,7 +153,15 @@ class ServerSetup(commands.Cog):
             return
         guild_id = str(ctx.guild.id)
         if greetings is None:
-            await ctx.send('환영 인사말을 입력해주세요.')
+            try:
+                with open("data/guildsetup.json", "r") as f:
+                    greets = json.load(f)
+                greets[guild_id]['goodbye'] = None
+                with open("data/guildsetup.json", "w") as s:
+                    json.dump(greets, s, indent=4)
+                await ctx.send(f'환영 인사말이 삭제되었습니다.')
+            except Exception as ex:
+                await ctx.send(f'오류 - {ex}')
         else:
             try:
                 with open("data/guildsetup.json", "r") as f:
@@ -143,7 +180,15 @@ class ServerSetup(commands.Cog):
             return
         guild_id = str(ctx.guild.id)
         if goodbye is None:
-            await ctx.send('작별 인사말을 입력해주세요.')
+            try:
+                with open("data/guildsetup.json", "r") as f:
+                    greets = json.load(f)
+                greets[guild_id]['goodbye'] = None
+                with open("data/guildsetup.json", "w") as s:
+                    json.dump(greets, s, indent=4)
+                await ctx.send(f'작별 인사말이 삭제되었습니다.')
+            except Exception as ex:
+                await ctx.send(f'오류 - {ex}')
         else:
             try:
                 with open("data/guildsetup.json", "r") as f:
@@ -162,7 +207,15 @@ class ServerSetup(commands.Cog):
             return
         guild_id = str(ctx.guild.id)
         if greetpm is None:
-            await ctx.send('DM 환영 인사말을 입력해주세요.')
+            try:
+                with open("data/guildsetup.json", "r") as f:
+                    greets = json.load(f)
+                greets[guild_id]['greetpm'] = None
+                with open("data/guildsetup.json", "w") as s:
+                    json.dump(greets, s, indent=4)
+                await ctx.send(f'DM 환영 인사말이 삭제되었습니다.')
+            except Exception as ex:
+                await ctx.send(f'오류 - {ex}')
         else:
             try:
                 with open("data/guildsetup.json", "r") as f:
@@ -243,6 +296,34 @@ class ServerSetup(commands.Cog):
         if answer is False:
             await ctx.send('이제 도배 방지 기능을 사용하지 않습니다.')
 
+    @commands.command()
+    @commands.has_permissions(ban_members=True)
+    async def 로그채널(self, ctx, *, channel=None):
+        if ctx.guild is None:
+            return
+        guild_id = str(ctx.guild.id)
+        if channel is None:
+            try:
+                with open("data/guildsetup.json", "r") as f:
+                    greets = json.load(f)
+                greets[guild_id]['log_channel'] = None
+                with open("data/guildsetup.json", "w") as s:
+                    json.dump(greets, s, indent=4)
+                await ctx.send(f'더이상 서버 로그를 출력하지 않습니다.')
+            except Exception as ex:
+                await ctx.send(f'오류 - {ex}')
+        else:
+            try:
+                channel = discord.utils.get(ctx.guild.text_channels, name=channel)
+                with open("data/guildsetup.json", "r") as f:
+                    greets = json.load(f)
+                greets[guild_id]['log_channel'] = str(channel)
+                with open("data/guildsetup.json", "w") as s:
+                    json.dump(greets, s, indent=4)
+                await ctx.send(f'로그 채널이 {channel.mention}(으)로 변경되었습니다.')
+            except Exception as ex:
+                await ctx.send(f'오류 - {ex}')
+
     # embed 탬플릿 (앞에 #을 지우고 사용하세요)
     # embed.add_field(name='', value=f"{}")
     # embed.add_field(name='', value=f"{}", inline=False)
@@ -265,6 +346,7 @@ class ServerSetup(commands.Cog):
         embed.add_field(name='모든 서버와 동기화된 대화 데이터베이스를 사용하나요?', value=f"{data[guild_id]['use_globaldata']}")
         embed.add_field(name='레벨 기능을 사용하나요?', value=f"{data[guild_id]['use_level']}", inline=False)
         embed.add_field(name='도배 방지 기능을 사용하나요?', value=f"{data[guild_id]['use_antispam']}")
+        embed.add_field(name='로그 출력 채널', value=f"{data[guild_id]['log_channel']}", inline=False)
 
         await ctx.send(embed=embed)
 
@@ -288,6 +370,7 @@ class ServerSetup(commands.Cog):
         data[guild_id]['use_globaldata'] = True
         data[guild_id]['use_level'] = True
         data[guild_id]['use_antispam'] = True
+        data[guild_id]['log_channel'] = '서버로그'
         data[guild_id]['template'] = True
         with open("data/guildsetup.json", "w") as s:
             json.dump(data, s, indent=4)
@@ -299,7 +382,7 @@ def setup(client):
 
 
 '''
-data[guild_id] = {}
+        data[guild_id] = {}
         data[guild_id]['welcomechannel'] = '환영합니다'
         data[guild_id]['greetings'] = '님이 서버에 들어오셨어요!'
         data[guild_id]['goodbye'] = '님이 서버에서 나가셨어요...'
@@ -309,5 +392,6 @@ data[guild_id] = {}
         data[guild_id]['use_globaldata'] = True
         data[guild_id]['use_level'] = True
         data[guild_id]['use_antispam'] = True
+        data[guild_id]['log_channel'] = '서버로그'
         data[guild_id]['template'] = True
 '''

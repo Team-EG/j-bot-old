@@ -16,11 +16,9 @@ class Talk(commands.Cog):
     @commands.command(pass_context=True)
     async def 정보(self, ctx):
         servers = len(self.client.guilds)
-        servers -= 1
         users = len(set(self.client.get_all_members()))
-        users -= servers
-        users -= 1
-        embed = discord.Embed(title='제이봇', description='by eunwoo1104#9600, V1 / R 2020-02-09', colour=discord.Color.red())
+        embed = discord.Embed(title='제이봇', description='by eunwoo1104#9600, V1 / R 2020-02-09',
+                              colour=discord.Color.red())
         embed.add_field(name='들어와있는 서버수', value=f'{servers}개')
         embed.add_field(name='같이 있는 유저수', value=f'{users}명', inline=False)
         embed.add_field(name='버그 신고는?', value='eunwoo1104#9600으로 DM 보내주세요!')
@@ -42,17 +40,6 @@ class Talk(commands.Cog):
                      '아아아아무말',
                      '말무아']
         await ctx.send(f'{random.choice(responses)}')
-
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if ":gulag:" in message.content.lower():
-            gulag = self.client.get_emoji(658622959786917908)
-            await message.add_reaction(gulag)
-
-    @commands.command()
-    async def 굴라크(self, ctx):
-        gulag = self.client.get_emoji(658622959786917908)
-        await ctx.send(f'{gulag}')
 
     @commands.command()
     async def 유저정보(self, ctx, member: discord.Member = None):
@@ -80,16 +67,19 @@ class Talk(commands.Cog):
     async def 구글검색(self, ctx, *, search=None):
         result = search.replace(" ", "+")
         url = f"https://www.google.com/search?q={result}&oq={result}&aqs=chrome..69i57j69i60j69i61.3020j0j8&sourceid=chrome&ie=UTF-8"
-        embed = discord.Embed(title="구글 검색 결과", description=f"'{search}'의 검색 결과입니다.", colour=discord.Colour(0xffffff), url=f"{url}")
+        embed = discord.Embed(title="구글 검색 결과", description=f"'{search}'의 검색 결과입니다.", colour=discord.Colour(0xffffff),
+                              url=f"{url}")
         await ctx.send(embed=embed)
 
     @commands.command(pass_context=True)
     async def 나무위키(self, ctx, *, search=None):
         result = search.replace(" ", "%20")
         url = f"https://namu.wiki/w/{result}"
-        embed = discord.Embed(title="나무위키 검색 결과", description=f"'{search}'의 검색 결과입니다.", colour=discord.Color.dark_green(),
+        embed = discord.Embed(title="나무위키 검색 결과", description=f"'{search}'의 검색 결과입니다.",
+                              colour=discord.Color.dark_green(),
                               url=f"{url}")
-        embed.set_thumbnail(url="https://w.namu.la/s/7744b80f6fa5262190bba52da210a8cdd2cb03c7d040c0be25274eade7de04ef4cb04ade767dc11bd6ea3d4164885d4e0608304200f5ad1380629c484bcd29c3365bb1c18531fdf9615491322081e9531d7c834467270a173fff1b840bc85626")
+        embed.set_thumbnail(
+            url="https://w.namu.la/s/7744b80f6fa5262190bba52da210a8cdd2cb03c7d040c0be25274eade7de04ef4cb04ade767dc11bd6ea3d4164885d4e0608304200f5ad1380629c484bcd29c3365bb1c18531fdf9615491322081e9531d7c834467270a173fff1b840bc85626")
         await ctx.send(embed=embed)
 
     @commands.command(pass_context=True)
@@ -100,6 +90,21 @@ class Talk(commands.Cog):
         embed.set_thumbnail(url="https://www.youtube.com/yts/img/yt_1200-vflhSIVnY.png")
         await ctx.send(embed=embed)
 
+    @commands.command()
+    async def 서버정보(self, ctx):
+        embed = discord.Embed(title='서버정보', colour=discord.Color.red())
+        embed.set_author(name=f'{ctx.guild.name}', icon_url=ctx.guild.icon_url)
+        embed.add_field(name='소유자', value=f'{ctx.guild.owner.display_name}')
+        embed.add_field(name='유저수', value=f'{ctx.guild.member_count}명', inline=False)
+        embed.add_field(name='서버가 생성된 날짜', value=f'{ctx.guild.created_at.strftime("%Y-%m-%d %I:%M:%S %p")}')
+        embed.add_field(name='역할수', value=str(len(ctx.guild.roles)) + '개', inline=False)
+        embed.add_field(name='서버 위치', value=f'{ctx.guild.region}')
+        await ctx.send(embed=embed)
+
 
 def setup(client):
     client.add_cog(Talk(client))
+
+    # embed 탬플릿 (앞에 #을 지우고 사용하세요)
+    # embed.add_field(name='', value='')
+    # embed.add_field(name='', value='', inline=False)
