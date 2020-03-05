@@ -1,9 +1,9 @@
 # 제이봇 소스코드 (2020.02.09 업데이트) by eunwoo1104#9600(a.k.a. Jeb Kerman @ KSP 한국 포럼)
-# Python 3.8 + discord.py rewrite 1.2.5 사용
+# Python 3.8 + discord.py rewrite 1.3.2 사용
 # 명령어를 추가할때는 bb2cogs 폴더속 파이썬 파일을 수정하거나 새 파이썬 파일을 만들어서 bb2cogs 폴더안에 넣어주세요.
 # 일부 명령어는 cogs 에서는 작동하지 않을 수 있습니다.
 # 주석 수정 예정 (귀찮)
-import discord  # pip3 install discord[voice] + pip3 install PyNaCl
+import discord  # pip3 install discord.py[voice] + pip3 install PyNaCl
 import os
 import json
 import logging
