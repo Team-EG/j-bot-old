@@ -11,6 +11,7 @@ class Level(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        print(f'{__name__} 로드 완료!')
 
     @commands.command()
     @commands.has_permissions(kick_members=True)

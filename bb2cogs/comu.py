@@ -10,6 +10,7 @@ from discord.ext import commands
 class Communication(commands.Cog):
     def __init__(self, client):
         self.client = client
+        print(f'{__name__} 로드 완료!')
 
     # 유저가 입력한 데이터 강제 삭제
     @commands.command()
@@ -160,7 +161,10 @@ class Communication(commands.Cog):
                 pf_data = json.load(f)
 
             # 은는물음표 삭제 + 대화 프리픽스로 시작하지 않았다면 리턴
-            if message.content.startswith(f"{pf_data[guild_id]['talk_prefixes']}"):
+            if f"{pf_data[guild_id]['talk_prefixes']}" == "":
+                return
+
+            elif message.content.startswith(f"{pf_data[guild_id]['talk_prefixes']}"):
                 question = str(message.content)
                 question = question.lstrip(f"{pf_data[guild_id]['talk_prefixes']}")
                 question = question.rstrip('?')

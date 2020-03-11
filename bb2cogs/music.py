@@ -14,6 +14,7 @@ class Music(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        print(f'{__name__} 로드 완료!')
 
     @commands.command(pass_context=True)
     async def 재생(self, ctx, url: str):

@@ -8,6 +8,7 @@ class ServerSetup(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        print(f'{__name__} 로드 완료!')
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -358,6 +359,8 @@ class ServerSetup(commands.Cog):
         guild_id = str(ctx.guild.id)
         with open("data/guildsetup.json", "r") as f:
             data = json.load(f)
+        with open('botsetup.json', 'r') as f:
+            prefix_data = json.load(f)
         del data[guild_id]
         time.sleep(0.5)
         data[guild_id] = {}
@@ -365,8 +368,8 @@ class ServerSetup(commands.Cog):
         data[guild_id]['greetings'] = '님이 서버에 들어오셨어요!'
         data[guild_id]['goodbye'] = '님이 서버에서 나가셨어요...'
         data[guild_id]['greetpm'] = None
-        data[guild_id]['prefixes'] = '제이봇 '
-        data[guild_id]['talk_prefixes'] = '제이야 '
+        data[guild_id]['prefixes'] = str(prefix_data["default prefix"])
+        data[guild_id]['talk_prefixes'] = str(prefix_data["talk prefix"])
         data[guild_id]['use_globaldata'] = True
         data[guild_id]['use_level'] = True
         data[guild_id]['use_antispam'] = True

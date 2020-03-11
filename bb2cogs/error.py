@@ -7,6 +7,7 @@ class Error(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        print(f'{__name__} 로드 완료!')
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):

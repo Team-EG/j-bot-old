@@ -13,6 +13,7 @@ class Admin(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        print(f'{__name__} 로드 완료!')
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
@@ -188,7 +189,7 @@ class Admin(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
-        embed = discord.Embed(title='메시지 수정됨', colour=discord.Color.red())
+        embed = discord.Embed(title='메시지 수정됨', colour=discord.Color.dark_magenta())
         embed.set_author(name=before.author.display_name, icon_url=before.author.avatar_url)
         embed.add_field(name='기존 내용', value=f'{before.content}')
         embed.add_field(name='수정된 내용', value=f'{after.content}', inline=False)

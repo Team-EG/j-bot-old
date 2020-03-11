@@ -9,6 +9,7 @@ from discord.ext import commands
 class Game(commands.Cog):
     def __init__(self, client):
         self.client = client
+        print(f'{__name__} 로드 완료!')
 
     @commands.command()
     async def 계정생성(self, ctx):

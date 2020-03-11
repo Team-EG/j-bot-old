@@ -6,6 +6,7 @@ class Help(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        print(f'{__name__} 로드 완료!')
 
     # embed 탬플릿 (앞에 #을 지우고 사용하세요)
     # embed.add_field(name='', value='', inline=False)

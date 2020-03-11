@@ -4,5 +4,6 @@
     "bot_name": "",
     "default prefix": "",
     "talk prefix": "",
-    "stable or canary?": ""
+    "stable or canary?": "",
+    "load immediately": false
 }

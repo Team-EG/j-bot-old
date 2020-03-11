@@ -7,13 +7,63 @@ import discord  # pip3 install discord.py[voice] + pip3 install PyNaCl
 import os
 import json
 import logging
+import sys
 from discord.ext import commands
+
 # 추가로 필요한 것들: requests(pip3 install requests), youtube_dl(pip3 install youtube-dl), beautifulsoup4(pip3 install beautifulsoup4)
 # 그리고 FFmpeg를 꼭 설치할 것 - https://ffmpeg.zeranoe.com/builds/ - 다운로드후 bin 폴더안에 있는 내용물을
 # venv(인터프리터 폴더, 따로 안만들었으면 AppData\Local\Programs\Python\Python{버전})\Scripts 폴더에 넣을 것
 
 with open('botsetup.json', 'r') as f:
     token_data = json.load(f)
+
+print('제이봇 V1 | 도움이 필요하시면 help 라고 말해주세요.')
+
+
+# 콘솔 시스템
+def wait_for_command_input():
+    if token_data['load immediately'] is True:
+        return
+    cmd = input('명령어: ')
+    if cmd == '':
+        wait_for_command_input()
+    elif cmd == 'load':
+        return
+    elif cmd == 'reset':
+        token_data['stabletoken'] = ''
+        token_data["canarytoken"] = ''
+        token_data["stable or canary?"] = ''
+        token_data['bot_name'] = ''
+        token_data['default prefix'] = ''
+        token_data['talk prefix'] = ''
+        token_data['load immediately'] = ''
+        with open('botsetup.json', 'w') as s:
+            json.dump(token_data, s, indent=4)
+        wait_for_command_input()
+    elif cmd == 'info':
+        print(token_data)
+        wait_for_command_input()
+    elif cmd == 'no_cmd':
+        token_data['load immediately'] = True
+        with open('botsetup.json', 'w') as s:
+            json.dump(token_data, s, indent=4)
+    elif cmd == 'help':
+        print(
+            '''help: 명령어 도움말을 표시합니다.
+load: 봇을 실행합니다.
+reset: 봇 설정을 초기화합니다.
+exit: 봇 프로그램을 종료합니다.
+no_cmd: 다음부터는 명령어를 입력하지 않고 바로 실행합니다.
+''')
+        wait_for_command_input()
+    elif cmd == 'exit':
+        sys.exit()
+    else:
+        print('없는 명령어입니다.')
+        wait_for_command_input()
+
+
+wait_for_command_input()
 
 # 만약에 botsetup.json에 토큰 데이터가 없을 경우 입력하도록 만드는 코드
 if token_data['stabletoken'] == "":
@@ -31,6 +81,7 @@ if token_data['stabletoken'] == "":
     token_data['bot_name'] = str(bot_name)
     token_data['default prefix'] = str(default_prefix)
     token_data['talk prefix'] = str(talk_prefix)
+    token_data['load immediately'] = False
     if canary is None:
         del token_data['canarytoken']
     print('정보 입력 완료!')
@@ -74,7 +125,7 @@ logger.addHandler(handler)
 # prefixes.json에서 프리픽스를 불러오는 코드
 def get_prefix(client, message):
     if message.guild is None:
-        return '제이봇 ' # DM일 경우 기본 프리픽스 리턴
+        return '제이봇 '  # DM일 경우 기본 프리픽스 리턴
     with open('data/guildsetup.json') as f:
         prefixes = json.load(f)
 
@@ -83,7 +134,7 @@ def get_prefix(client, message):
 
 # 봇 주인 확인 코드
 def is_owner(ctx):
-    return ctx.message.author.id == 288302173912170497 # 봇 주인 ID 입력
+    return ctx.message.author.id == 288302173912170497  # 봇 주인 ID 입력
 
 
 # 프리픽스 불러오기
@@ -137,6 +188,13 @@ async def update(ctx):
                 await ctx.send(f"{filename[:-3]} 업데이트 완료!")
     except Exception as ex:
         await ctx.send(f"오류 - {ex}")
+
+
+@client.command()
+@commands.check(is_owner)
+async def console(ctx):
+    await ctx.send('프로그램 창에서 명령어를 입력해주세요. 봇이 일시정지 상태입니다.')
+    wait_for_command_input()
 
 
 # cog를 불러오는 스크립트
