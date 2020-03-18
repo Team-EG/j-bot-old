@@ -32,16 +32,16 @@ class Admin(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(kick_members=True)
-    async def 킥(self, ctx, member: discord.Member, *, reason=None):
-        await ctx.send(f'{member}을(를) 킥했어요. (이유:{reason})')
-        await member.send(f'{ctx.guild}에서 킥되었습니다.')
+    async def 추방(self, ctx, member: discord.Member, *, reason=None):
+        await ctx.send(f'{member}을(를) 추방했어요. (이유:{reason})')
+        await member.send(f'{ctx.guild}에서 추방되었습니다.')
         await member.kick(reason=reason)
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
-    async def 밴(self, ctx, member: discord.Member, *, reason=None):
-        await ctx.send(f'{member}을(를) 밴했어요. (이유:{reason})')
-        await member.send(f'{ctx.guild}에서 밴되었습니다.')
+    async def 차단(self, ctx, member: discord.Member, *, reason=None):
+        await ctx.send(f'{member}을(를) 차단했어요. (이유:{reason})')
+        await member.send(f'{ctx.guild}에서 차단되었습니다.')
         await member.send('https://www.youtube.com/watch?v=3vAC_3jGpKo')  # 링크 열어보면 무슨 영상인지 알 수 있음 (이시국 주의)
         await member.ban(reason=reason)
 
@@ -66,6 +66,13 @@ class Admin(commands.Cog):
         mute = discord.utils.get(ctx.guild.roles, name='뮤트')
         await member.add_roles(mute)
         await ctx.send(f'{member.mention}님을 뮤트했습니다. (이유: {reason})')
+
+    @commands.command()
+    @commands.has_permissions(kick_members=True)
+    async def 뮤트해제(self, ctx, member: discord.Member):
+        mute = discord.utils.get(ctx.guild.roles, name='뮤트')
+        await member.remove_roles(mute)
+        await ctx.send(f'{member.mention}님을 뮤트 해제했습니다.')
 
     @commands.command()
     @commands.has_permissions(kick_members=True)
@@ -94,7 +101,7 @@ class Admin(commands.Cog):
         except KeyError:
             warn_data[str(member.id)] = {}
             warn_data[str(member.id)]["warn"] = {}
-            warn_data[str(member.id)]["warn"][str(currenttime)] = f"{reason}, by {ctx.author}"
+            warn_data[str(member.id)]["warn"][str(currenttime)] = f"{reason}, by <@{ctx.author.id}>"
 
         with open(f'data/guild_data/{guild_id}/admin.json', 'w') as s:
             json.dump(warn_data, s, indent=4)
@@ -171,38 +178,6 @@ class Admin(commands.Cog):
 
         await ctx.send('경고가 삭제되었습니다.')
 
-    @commands.Cog.listener()
-    async def on_message_delete(self, message):
-        embed = discord.Embed(title='메시지 삭제됨', colour=discord.Color.red())
-        embed.set_author(name=message.author.display_name, icon_url=message.author.avatar_url)
-        embed.add_field(name=f'#{message.channel}', value=f'{message.content}')
-
-        try:
-            with open("data/guildsetup.json", "r") as f:
-                data = json.load(f)
-
-            channel = discord.utils.get(message.guild.text_channels, name=data[str(message.guild.id)]['log_channel'])
-
-            await channel.send(embed=embed)
-        except:
-            pass
-
-    @commands.Cog.listener()
-    async def on_message_edit(self, before, after):
-        embed = discord.Embed(title='메시지 수정됨', colour=discord.Color.dark_magenta())
-        embed.set_author(name=before.author.display_name, icon_url=before.author.avatar_url)
-        embed.add_field(name='기존 내용', value=f'{before.content}')
-        embed.add_field(name='수정된 내용', value=f'{after.content}', inline=False)
-
-        try:
-            with open("data/guildsetup.json", "r") as f:
-                data = json.load(f)
-
-            channel = discord.utils.get(after.guild.text_channels, name=data[str(after.guild.id)]['log_channel'])
-
-            await channel.send(embed=embed)
-        except:
-            pass
 
 
 def setup(client):

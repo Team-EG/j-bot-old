@@ -17,7 +17,8 @@ class Music(commands.Cog):
         print(f'{__name__} 로드 완료!')
 
     @commands.command(pass_context=True)
-    async def 재생(self, ctx, url: str):
+    async def 재생(self, ctx, *, url: str):
+        global title
         guild_id = ctx.message.guild.id
         voice = get(self.client.voice_clients, guild=ctx.guild)
 
@@ -112,7 +113,7 @@ class Music(commands.Cog):
         except Exception:
             pass
 
-        await ctx.send('잠시만 기다려주세요, 준비할께요.')
+        await ctx.send('잠시만 기다려주세요, 준비할께요. (해당 기능은 베타 기능입니다. 봇이 의도대로 작동하지 않을수도 있습니다.)')
         await self.client.change_presence(status=discord.Status.dnd,
                                           activity=discord.Game('저 지금 바빠요! (뮤직 다운로드중)'))
 
@@ -133,11 +134,18 @@ class Music(commands.Cog):
             }],
         }
 
-        try:
+        if url.startswith("https://") or url.startswith("youtube.com") or url.startswith("youtu.be"):
+            try:
+                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                    ydl.download([url])
+                title = ydl.extract_info(url, download=False).get('title', None)
+            except Exception as ex:
+                await ctx.send(f"음악 다운로드중 오류가 발생했습니다. - {ex}")
+        else:
+            song_search = " ".join(url)
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([url])
-        except Exception as ex:
-            await ctx.send(f"음악 다운로드중 오류가 발생했습니다. - {ex}")
+                ydl.download([f"ytsearch1:{song_search}"])
+            title = url
 
         for file in os.listdir(f"./"):
             if file.endswith(".mp3"):
@@ -149,7 +157,6 @@ class Music(commands.Cog):
         voice.source = discord.PCMVolumeTransformer(voice.source)
         voice.source.volume = 1
 
-        title = ydl.extract_info(url, download=False).get('title', None)
         await ctx.send(f'"{title}"을(를) 재생할께요!')
         with open('botsetup.json', 'r') as f:
             data = json.load(f)
@@ -277,7 +284,8 @@ class Music(commands.Cog):
                 return
 
     @commands.command(pass_context=True)
-    async def 대기(self, ctx, url: str):
+    async def 대기(self, ctx, *, url: str):
+        global title
         if 'list=' in url:
             await ctx.send('이 링크는 재생목록이네요... 대기 리스트 추가가 취소되었습니다.')
             return
@@ -297,11 +305,18 @@ class Music(commands.Cog):
             }],
         }
 
-        try:
+        if url.startswith("https://") or url.startswith("youtube.com") or url.startswith("youtu.be"):
+            try:
+                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                    ydl.download([url])
+                title = ydl.extract_info(url, download=False).get('title', None)
+            except Exception as ex:
+                await ctx.send(f"음악 다운로드중 오류가 발생했습니다. - {ex}")
+        else:
+            song_search = " ".join(url)
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([url])
-        except Exception as ex:
-            await ctx.send(f"음악 다운로드중 오류가 발생했습니다. - {ex}")
+                ydl.download([f"ytsearch1:{song_search}"])
+            title = url
 
         for file in os.listdir(f"./"):
             if file.endswith(".mp3"):
@@ -310,7 +325,6 @@ class Music(commands.Cog):
                 os.rename(file, f"{currenttime}.mp3")
                 shutil.move(f"{currenttime}.mp3", f"music/{guild_id}/Queue")
 
-                title = ydl.extract_info(url, download=False).get('title', None)
                 await ctx.send(f"{title}을(를) 대기 리스트에 넣었어요!")
                 with open('botsetup.json', 'r') as f:
                     data = json.load(f)

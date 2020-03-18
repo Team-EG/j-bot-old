@@ -1,5 +1,7 @@
 import discord
 import random
+import json
+import platform
 from discord.ext import commands
 from time import strftime, localtime
 
@@ -14,15 +16,19 @@ class Talk(commands.Cog):
     async def 안녕(self, ctx):
         await ctx.send('안녕하세요!')
 
+    # embed 탬플릿 (앞에 #을 지우고 사용하세요)
+    # embed.add_field(name='', value='', inline=False)
+
     @commands.command(pass_context=True)
     async def 정보(self, ctx):
         servers = len(self.client.guilds)
         users = len(set(self.client.get_all_members()))
-        embed = discord.Embed(title='제이봇', description='by eunwoo1104#9600, V1 / R 2020-02-09',
+        embed = discord.Embed(title='제이봇', description='by eunwoo1104#9600, V1 / R 2020-03-16',
                               colour=discord.Color.red())
-        embed.add_field(name='들어와있는 서버수', value=f'{servers}개')
+        embed.add_field(name='들어와있는 서버수', value=f'{servers}개', inline=False)
         embed.add_field(name='같이 있는 유저수', value=f'{users}명', inline=False)
-        embed.add_field(name='버그 신고는?', value='eunwoo1104#9600으로 DM 보내주세요!')
+        embed.add_field(name='서버 OS', value=f'{platform.platform()}', inline=False)
+        embed.add_field(name='버그 신고는?', value='eunwoo1104#9600으로 DM 보내주세요!', inline=False)
 
         await ctx.send(embed=embed)
 
@@ -32,6 +38,24 @@ class Talk(commands.Cog):
         embed = discord.Embed(title="제이봇 크레딧", description=f"링크를 눌러보세요.", colour=discord.Colour(0xffffff),
                               url=f"{url}")
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def 소스코드(self, ctx):
+        url = f"https://github.com/eunwoo1104/j-bot"
+        embed = discord.Embed(title="제이봇 소스코드", description=f"링크를 눌러보세요.", colour=discord.Colour(0xffffff),
+                              url=f"{url}")
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def 소스코드내놔(self, ctx):
+        await ctx.send('정중하게 요청하면 드리죠.')
+
+    @commands.command()
+    async def 소스코드주세요(self, ctx):
+        guild_id = str(ctx.guild.id)
+        with open("data/guildsetup.json", "r") as f:
+            data = json.load(f)
+        await ctx.send(f'Aㅓ... 이런거를 바란거는 아닌ㄷ\n`{data[guild_id]["prefixes"]}소스코드`라고 말하세요.')
 
     @commands.command()
     async def 아무말(self, ctx):
@@ -93,13 +117,20 @@ class Talk(commands.Cog):
 
     @commands.command()
     async def 서버정보(self, ctx):
+        roles = ctx.guild.roles
+        rm_list = []
+        for i in roles:
+            roles_mention = i.mention
+            rm_list.append(roles_mention)
         embed = discord.Embed(title='서버정보', colour=discord.Color.red())
         embed.set_author(name=f'{ctx.guild.name}', icon_url=ctx.guild.icon_url)
-        embed.add_field(name='소유자', value=f'{ctx.guild.owner.display_name}')
+        embed.add_field(name='소유자', value=f'{ctx.guild.owner.mention}', inline=False)
         embed.add_field(name='유저수', value=f'{ctx.guild.member_count}명', inline=False)
-        embed.add_field(name='서버가 생성된 날짜', value=f'{ctx.guild.created_at.strftime("%Y-%m-%d %I:%M:%S %p")}')
+        embed.add_field(name='서버가 생성된 날짜', value=f'{ctx.guild.created_at.strftime("%Y-%m-%d %I:%M:%S %p")}',
+                        inline=False)
         embed.add_field(name='역할수', value=str(len(ctx.guild.roles)) + '개', inline=False)
-        embed.add_field(name='서버 위치', value=f'{ctx.guild.region}')
+        embed.add_field(name='역할 리스트', value=f'{rm_list}', inline=False)
+        embed.add_field(name='서버 위치', value=f'{ctx.guild.region}', inline=False)
         await ctx.send(embed=embed)
 
 
@@ -107,5 +138,4 @@ def setup(client):
     client.add_cog(Talk(client))
 
     # embed 탬플릿 (앞에 #을 지우고 사용하세요)
-    # embed.add_field(name='', value='')
     # embed.add_field(name='', value='', inline=False)

@@ -14,6 +14,57 @@ class Level(commands.Cog):
         print(f'{__name__} 로드 완료!')
 
     @commands.command()
+    @commands.has_permissions(ban_members=True)
+    async def 리워드제거(self, ctx, level_req=None):
+        guild_id = str(ctx.guild.id)
+        if level_req is None:
+            await ctx.send('양식: [프리픽스] 리워드제거 [필요한 레벨]')
+            return
+        with open(f"level/{guild_id}/reward.json", 'r') as a:
+            role = json.load(a)
+        try:
+            del role[level_req]
+            with open(f"level/{guild_id}/reward.json", 'w') as a:
+                json.dump(role, a, indent=4)
+            await ctx.send('해당 리워드를 제거했습니다.')
+        except KeyError:
+            await ctx.send('해당 리워드가 없습니다.')
+
+
+    @commands.command()
+    async def 리워드정보(self, ctx):
+        guild_id = str(ctx.guild.id)
+        with open(f"level/{guild_id}/reward.json", 'r') as a:
+            role = json.load(a)
+
+        rewards = role.keys()
+        rewards = list(rewards)
+        try:
+            embed = discord.Embed(title='리워드 리스트', description=f'{ctx.guild.name}', colour=discord.Color.red())
+            for key in rewards:
+                reward_role = discord.utils.get(ctx.guild.roles, name=str(role[key]))
+                embed.add_field(name=f'{key}레벨', value=f'{reward_role.mention}', inline=False)
+            await ctx.send(embed=embed)
+        except KeyError:
+            await ctx.send('리워드 리스트가 없습니다.')
+
+    @commands.command()
+    @commands.has_permissions(ban_members=True)
+    async def 리워드(self, ctx, level_req, role_name=None):
+        guild_id = str(ctx.guild.id)
+        if role_name is None:
+            await ctx.send('양식: [프리픽스] 리워드 [필요한 레벨] [역할 이름]')
+            return
+
+        check_role = discord.utils.get(ctx.guild.roles, name=role_name)
+        with open(f"level/{guild_id}/reward.json", 'r') as a:
+            role = json.load(a)
+        role[level_req] = role_name
+        await ctx.send(f'{check_role.mention}은(는) 이제 {level_req}레벨을 달성했을 때 얻습니다.')
+        with open(f"level/{guild_id}/reward.json", 'w') as a:
+            json.dump(role, a, indent=4)
+
+    @commands.command()
     @commands.has_permissions(kick_members=True)
     async def XP입력(self, ctx, member: discord.Member = None, xp_num=None):
         guild_id = str(ctx.message.guild.id)
@@ -161,6 +212,7 @@ class Level(commands.Cog):
                 else:
                     os.mkdir(f'level/{guild_id}')
                     shutil.copy("level/xp.json", f"level/{guild_id}/xp.json")
+                    shutil.copy("level/reward.json", f"level/{guild_id}/reward.json")
 
                 with open(f"level/{guild_id}/xp.json", "r") as f:
                     xp_data = json.load(f)
@@ -168,6 +220,7 @@ class Level(commands.Cog):
                 xp_choice = [5, 10, 15, 20, 25]
 
                 currenttime = time.strftime('%Y%m%d%H%M%S')
+                spamtimer = time.time()
 
                 if not author_id in xp_data:
                     xp_data[author_id] = {}
@@ -176,7 +229,7 @@ class Level(commands.Cog):
                     xp_data[author_id]["spam_count"] = 0
                     xp_data[author_id]["warn"] = 0
                     xp_data[author_id]["last_msg"] = int(currenttime)
-                    xp_data[author_id]["last_spam"] = int(currenttime)
+                    xp_data[author_id]["last_spam"] = int(spamtimer)
                     xp_data[author_id]["kick_count"] = 0
                 else:
                     pass
@@ -185,9 +238,9 @@ class Level(commands.Cog):
                     json.dump(xp_data, s, indent=4)
 
                 timepassed = int(currenttime) - int(xp_data[author_id]["last_msg"])
-                spamtimepassed = int(currenttime) - int(xp_data[author_id]["last_spam"])
+                spamtimepassed = int(spamtimer) - int(xp_data[author_id]["last_spam"])
                 if timepassed <= 100:
-                    if spamtimepassed <= 100:
+                    if spamtimepassed <= 10:
                         with open("data/guildsetup.json", "r") as f:
                             data = json.load(f)
                         if data[guild_id]['use_antispam'] is True:
@@ -197,12 +250,12 @@ class Level(commands.Cog):
                     else:
                         return
                     xp_data[author_id]["spam_count"] += 1
-                    xp_data[author_id]["last_spam"] = int(currenttime)
+                    xp_data[author_id]["last_spam"] = int(spamtimer)
 
-                    if xp_data[author_id]["spam_count"] == 15:
+                    if xp_data[author_id]["spam_count"] == 10:
                         await message.channel.send(f"{message.author.mention} 도배 경고")
 
-                    elif xp_data[author_id]["spam_count"] == 30:
+                    elif xp_data[author_id]["spam_count"] == 20:
                         await message.channel.send(f"{message.author.mention} 도베로 인해 XP가 초기화되었습니다.")
                         xp_data[author_id]["exp"] = 0
                         xp_data[author_id]["lvl"] = 1
@@ -241,7 +294,7 @@ class Level(commands.Cog):
                 xp_data[author_id]["exp"] += random.choice(xp_choice)
                 xp_data[author_id]["spam_count"] = 0
                 xp_data[author_id]["last_msg"] = int(currenttime)
-                xp_data[author_id]["last_spam"] = int(currenttime)
+                xp_data[author_id]["last_spam"] = int(spamtimer)
 
                 with open(f"level/{guild_id}/xp.json", "w") as s:
                     json.dump(xp_data, s, indent=4)
@@ -256,6 +309,15 @@ class Level(commands.Cog):
 
                     with open(f"level/{guild_id}/xp.json", "w") as a:
                         json.dump(xp_data, a, indent=4)
+
+                with open(f"level/{guild_id}/reward.json", 'r') as a:
+                    role = json.load(a)
+                try:
+                    reward_role = role[xp_data[author_id]["lvl"]]
+                    receive = discord.utils.get(message.guild.roles, name=str(reward_role))
+                    await message.author.add_roles(receive)
+                except KeyError:
+                    pass
 
 
 def setup(client):

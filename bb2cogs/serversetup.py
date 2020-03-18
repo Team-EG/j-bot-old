@@ -57,15 +57,14 @@ class ServerSetup(commands.Cog):
         with open("data/guildsetup.json", "w") as s:
             json.dump(data, s, indent=4)
 
-        await guild.owner.send(f'{guild.name}에 이 봇을 초대해주셔서 감사합니다.'
-                               f'\n번거로우시겠지만, 기본적인 설정 한가지가 필요합니다.'
-                               f'\n지금 서버를 화인해보시면, "뮤트"라는 역할이 생성되있을 것입니다.'
-                               f'\n봇의 한계로, 채널에 역할 설정을 하는 것이 불가능합니다.'
-                               f'\n모든 텍스트 채널 권한에 "뮤트"역할을 추가해주시고, "메시지 보내기"를 X로 바꿔주세요.'
-                               f'\n꼭 이것을 해야지만 뮤트 명령어가 제대로 작동합니다.'
-                               f'\n다만, 만약에 이 기능이 필요없다면 안해주셔도 상관없습니다.'
-                               f'\n나중에라도 이 설정을 자동으로 할 수 있도록 하겠습니다.'
-                               f'\n감사합니다. -{bot_name}-')
+        mute_role = discord.utils.get(guild.roles, name='뮤트')
+        for i in guild.text_channels:
+            await i.set_permissions(mute_role, send_messages=False)
+
+        await guild.owner.send(f'{guild.name}에 이 봇을 초대해주셔서 감사합니다.\n'
+                               f'현재 이 봇은 베타 버전입니다.\n'
+                               f'명령어가 자주 추가되거나 제거될 수 있습니다.\n'
+                               f'최대한 안정적인 봇으로 완성하겠습니다. -{bot_name}-')
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
@@ -126,26 +125,22 @@ class ServerSetup(commands.Cog):
             return
         guild_id = str(ctx.guild.id)
         if channel is None:
-            try:
-                with open("data/guildsetup.json", "r") as f:
-                    greets = json.load(f)
-                greets[guild_id]['welcomechannel'] = None
-                with open("data/guildsetup.json", "w") as s:
-                    json.dump(greets, s, indent=4)
-                await ctx.send(f'더이상 환영 메시지를 보내지 않습니다.')
-            except Exception as ex:
-                await ctx.send(f'오류 - {ex}')
+            await ctx.send('뒤에 [사용중지/{채널 이름}]중 하나를 입력해주세요.')
+        elif channel == '사용중지':
+            with open("data/guildsetup.json", "r") as f:
+                greets = json.load(f)
+            greets[guild_id]['welcomechannel'] = None
+            with open("data/guildsetup.json", "w") as s:
+                json.dump(greets, s, indent=4)
+            await ctx.send(f'더이상 환영 메시지를 보내지 않습니다.')
         else:
-            try:
-                channel = discord.utils.get(ctx.guild.text_channels, name=channel)
-                with open("data/guildsetup.json", "r") as f:
-                    greets = json.load(f)
-                greets[guild_id]['welcomechannel'] = str(channel)
-                with open("data/guildsetup.json", "w") as s:
-                    json.dump(greets, s, indent=4)
-                await ctx.send(f'환영 채널이 {channel.mention}(으)로 변경되었습니다.')
-            except Exception as ex:
-                await ctx.send(f'오류 - {ex}')
+            channel = discord.utils.get(ctx.guild.text_channels, name=channel)
+            with open("data/guildsetup.json", "r") as f:
+                greets = json.load(f)
+            greets[guild_id]['welcomechannel'] = str(channel)
+            with open("data/guildsetup.json", "w") as s:
+                json.dump(greets, s, indent=4)
+            await ctx.send(f'환영 채널이 {channel.mention}(으)로 변경되었습니다.')
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
@@ -154,25 +149,21 @@ class ServerSetup(commands.Cog):
             return
         guild_id = str(ctx.guild.id)
         if greetings is None:
-            try:
-                with open("data/guildsetup.json", "r") as f:
-                    greets = json.load(f)
-                greets[guild_id]['goodbye'] = None
-                with open("data/guildsetup.json", "w") as s:
-                    json.dump(greets, s, indent=4)
-                await ctx.send(f'환영 인사말이 삭제되었습니다.')
-            except Exception as ex:
-                await ctx.send(f'오류 - {ex}')
+            await ctx.send('뒤에 [사용중지/{인사말}]중 하나를 입력해주세요.')
+        elif greetings == '사용중지':
+            with open("data/guildsetup.json", "r") as f:
+                greets = json.load(f)
+            greets[guild_id]['goodbye'] = None
+            with open("data/guildsetup.json", "w") as s:
+                json.dump(greets, s, indent=4)
+            await ctx.send(f'환영 인사말이 삭제되었습니다.')
         else:
-            try:
-                with open("data/guildsetup.json", "r") as f:
-                    greets = json.load(f)
-                greets[guild_id]['greetings'] = str(greetings)
-                with open("data/guildsetup.json", "w") as s:
-                    json.dump(greets, s, indent=4)
-                await ctx.send(f'환영 인사말이 {greetings}(으)로 변경되었습니다.')
-            except Exception as ex:
-                await ctx.send(f'오류 - {ex}')
+            with open("data/guildsetup.json", "r") as f:
+                greets = json.load(f)
+            greets[guild_id]['greetings'] = str(greetings)
+            with open("data/guildsetup.json", "w") as s:
+                json.dump(greets, s, indent=4)
+            await ctx.send(f'환영 인사말이 {greetings}(으)로 변경되었습니다.')
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
@@ -181,25 +172,21 @@ class ServerSetup(commands.Cog):
             return
         guild_id = str(ctx.guild.id)
         if goodbye is None:
-            try:
-                with open("data/guildsetup.json", "r") as f:
-                    greets = json.load(f)
-                greets[guild_id]['goodbye'] = None
-                with open("data/guildsetup.json", "w") as s:
-                    json.dump(greets, s, indent=4)
-                await ctx.send(f'작별 인사말이 삭제되었습니다.')
-            except Exception as ex:
-                await ctx.send(f'오류 - {ex}')
+            await ctx.send('뒤에 [사용중지/{작별인사말}]중 하나를 입력해주세요.')
+        elif goodbye == '사용중지':
+            with open("data/guildsetup.json", "r") as f:
+                greets = json.load(f)
+            greets[guild_id]['goodbye'] = None
+            with open("data/guildsetup.json", "w") as s:
+                json.dump(greets, s, indent=4)
+            await ctx.send(f'작별 인사말이 삭제되었습니다.')
         else:
-            try:
-                with open("data/guildsetup.json", "r") as f:
-                    greets = json.load(f)
-                greets[guild_id]['goodbye'] = str(goodbye)
-                with open("data/guildsetup.json", "w") as s:
-                    json.dump(greets, s, indent=4)
-                await ctx.send(f'작별 인사말이 {goodbye}(으)로 변경되었습니다.')
-            except Exception as ex:
-                await ctx.send(f'오류 - {ex}')
+            with open("data/guildsetup.json", "r") as f:
+                greets = json.load(f)
+            greets[guild_id]['goodbye'] = str(goodbye)
+            with open("data/guildsetup.json", "w") as s:
+                json.dump(greets, s, indent=4)
+            await ctx.send(f'작별 인사말이 {goodbye}(으)로 변경되었습니다.')
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
@@ -208,25 +195,21 @@ class ServerSetup(commands.Cog):
             return
         guild_id = str(ctx.guild.id)
         if greetpm is None:
-            try:
-                with open("data/guildsetup.json", "r") as f:
-                    greets = json.load(f)
-                greets[guild_id]['greetpm'] = None
-                with open("data/guildsetup.json", "w") as s:
-                    json.dump(greets, s, indent=4)
-                await ctx.send(f'DM 환영 인사말이 삭제되었습니다.')
-            except Exception as ex:
-                await ctx.send(f'오류 - {ex}')
+            await ctx.send('뒤에 [사용중지/{DM인사말}]중 하나를 입력해주세요.')
+        elif greetpm == '사용중지':
+            with open("data/guildsetup.json", "r") as f:
+                greets = json.load(f)
+            greets[guild_id]['greetpm'] = None
+            with open("data/guildsetup.json", "w") as s:
+                json.dump(greets, s, indent=4)
+            await ctx.send(f'DM 환영 인사말이 삭제되었습니다.')
         else:
-            try:
-                with open("data/guildsetup.json", "r") as f:
-                    greets = json.load(f)
-                greets[guild_id]['greetpm'] = str(greetpm)
-                with open("data/guildsetup.json", "w") as s:
-                    json.dump(greets, s, indent=4)
-                await ctx.send(f'DM 환영 인사말이 {greetpm}(으)로 변경되었습니다.')
-            except Exception as ex:
-                await ctx.send(f'오류 - {ex}')
+            with open("data/guildsetup.json", "r") as f:
+                greets = json.load(f)
+            greets[guild_id]['greetpm'] = str(greetpm)
+            with open("data/guildsetup.json", "w") as s:
+                json.dump(greets, s, indent=4)
+            await ctx.send(f'DM 환영 인사말이 {greetpm}(으)로 변경되었습니다.')
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
@@ -304,26 +287,22 @@ class ServerSetup(commands.Cog):
             return
         guild_id = str(ctx.guild.id)
         if channel is None:
-            try:
-                with open("data/guildsetup.json", "r") as f:
-                    greets = json.load(f)
-                greets[guild_id]['log_channel'] = None
-                with open("data/guildsetup.json", "w") as s:
-                    json.dump(greets, s, indent=4)
-                await ctx.send(f'더이상 서버 로그를 출력하지 않습니다.')
-            except Exception as ex:
-                await ctx.send(f'오류 - {ex}')
+            await ctx.send('뒤에 [사용중지/{채널 이름}]중 하나를 입력해주세요.')
+        elif channel == '사용중지':
+            with open("data/guildsetup.json", "r") as f:
+                greets = json.load(f)
+            greets[guild_id]['log_channel'] = None
+            with open("data/guildsetup.json", "w") as s:
+                json.dump(greets, s, indent=4)
+            await ctx.send(f'더이상 서버 로그를 출력하지 않습니다.')
         else:
-            try:
-                channel = discord.utils.get(ctx.guild.text_channels, name=channel)
-                with open("data/guildsetup.json", "r") as f:
-                    greets = json.load(f)
-                greets[guild_id]['log_channel'] = str(channel)
-                with open("data/guildsetup.json", "w") as s:
-                    json.dump(greets, s, indent=4)
-                await ctx.send(f'로그 채널이 {channel.mention}(으)로 변경되었습니다.')
-            except Exception as ex:
-                await ctx.send(f'오류 - {ex}')
+            channel = discord.utils.get(ctx.guild.text_channels, name=channel)
+            with open("data/guildsetup.json", "r") as f:
+                greets = json.load(f)
+            greets[guild_id]['log_channel'] = str(channel)
+            with open("data/guildsetup.json", "w") as s:
+                json.dump(greets, s, indent=4)
+            await ctx.send(f'로그 채널이 {channel.mention}(으)로 변경되었습니다.')
 
     # embed 탬플릿 (앞에 #을 지우고 사용하세요)
     # embed.add_field(name='', value=f"{}")
