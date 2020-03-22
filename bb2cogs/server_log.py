@@ -131,6 +131,8 @@ class Server_Log(commands.Cog):
             for i in after_role:
                 ar_mention = i.mention
                 ar_list.append(ar_mention)
+            if len(br_list) == len(ar_list):
+                return
             embed.add_field(name='역할 변경 전', value=f'{br_list}', inline=False)
             embed.add_field(name='역할 변경 후', value=f'{ar_list}', inline=False)
         else:

@@ -14,7 +14,7 @@ class Help(commands.Cog):
     @commands.command(aliases=['help'])
     async def 도움(self, ctx):
         embed = discord.Embed(title='명령어 리스트', description='!꼭 프리픽스를 앞에 붙히세요!', colour=discord.Color.red())
-        embed.add_field(name="도움", value="명령어 리스트를 보여줍니다.", inline=False)
+        embed.add_field(name="도움", value="명령어 리스트를 보여줍니다. (help)", inline=False)
         embed.add_field(name='네이버검색 [검색어]', value='초록창에 검색어를 대신 입력해줍니다.', inline=False)
         embed.add_field(name='구글검색 [검색어]', value='구글 검색창에 검색어를 대신 입력해줍니다.', inline=False)
         embed.add_field(name='나무위키 [검색어]', value='나무위키 검색창에 검색어를 대신 입력해줍니다.', inline=False)
@@ -27,6 +27,7 @@ class Help(commands.Cog):
         embed.add_field(name='소스코드', value='이 봇의 소스코드를 보여줍니다.', inline=False)
         embed.add_field(name='누적경고', value='자신이 받은 경고들을 출력합니다.', inline=False)
         embed.add_field(name='경고정보 [유저-맨션] [경고-번호]', value='해당 경고를 받은 이유를 출력합니다.', inline=False)
+        embed.add_field(name='뮤직도움', value='뮤직봇 기능에 대한 도움말을 출력합니다.', inline=False)
         embed.add_field(name="관리자도움", value="관리자 전용 명령어 리스트를 DM으로 보냅니다.- 서버 관리자 이상만 사용 가능", inline=False)
         embed.add_field(name='KSP도움', value='KSP LMP 멀티 서버 관련 명령어 리스트를 출력합니다.', inline=False)
         embed.add_field(name='MD도움', value='마인더스트리 서버 관련 명령어 리스트를 출력합니다.', inline=False)
@@ -38,7 +39,21 @@ class Help(commands.Cog):
     # 뮤직봇 기능 도움 명령어 (DM으로 보내짐, embed 사용)
     @commands.command()
     async def 뮤직도움(self, ctx):
-        await ctx.send("해당 기능은 성능 문제로 삭제되었습니다.")
+        embed = discord.Embed(title='뮤직봇 기능 명령어 리스트', description='!꼭 프리픽스를 앞에 붙히세요!', colour=discord.Color.red())
+        embed.add_field(name="뮤직도움", value="뮤직봇 기능 명령어 리스트를 보여줍니다.")
+        embed.add_field(name='들어와', value='봇이 보이스 서버에 들어오게 합니다. (join, j)', inline=False)
+        embed.add_field(name="나가", value="봇이 보이스 서버에서 나가게 합니다. (leave, l)")
+        embed.add_field(name="재생 [유튜브-url]", value="유튜브 url 음악을 재생합니다. (play, p)", inline=False)
+        embed.add_field(name="일시정지", value="음악을 일시정지합니다. (pause, ps)")
+        embed.add_field(name='계속재생', value='음악을 다시 재생합니다. (resume, r)', inline=False)
+        embed.add_field(name="멈춰", value="음악을 멈춥니다. (stop)")
+        embed.add_field(name='대기 [유튜브-url]', value='유튜브 url 음악을 대기 리스트에 넣습니다. (queue, q)', inline=False)
+        embed.add_field(name="스킵", value="재생중인 음악을 스킵합니다. (skip, s)")
+        embed.add_field(name='대기리스트', value='현재 재생 대기중인 음악 리스트를 보여줍니다.', inline=False)
+
+        await ctx.send("DM을 확인해주세요!")
+
+        await ctx.author.send(embed=embed)
 
     # 관리자 명령어 리스트 (DM으로 보내짐, embed 사용)
     @commands.command()
@@ -52,7 +67,7 @@ class Help(commands.Cog):
         embed.add_field(name='뮤트 [유저-맨션-또는-ID] [이유]', value='해당 유저를 뮤트합니다.', inline=False)
         embed.add_field(name='뮤트해제 [유저-맨션-또는-ID]', value='해당 유저를 뮤트 해제합니다.', inline=False)
         embed.add_field(name='프리픽스교체 [프리픽스]', value='프리픽스를 교체합니다.\n주의! - 띄어쓰기가 필요한 경우 "[프리픽스]" (쌍따옴표 붙이기)로 해주세요!', inline=False)
-        embed.add_field(name='정리해 [숫자]', value='숫자만큼의 채팅을 삭제합니다.', inline=False)
+        embed.add_field(name='정리 [숫자]', value='숫자만큼의 채팅을 삭제합니다.', inline=False)
         embed.add_field(name='XP리셋 [유저-맨션-혹은-ID]', value='해당 유저의 XP를 초기화합니다.', inline=False)
         embed.add_field(name='XP입력 [유저-맨션-혹은-ID] [XP값]', value='해당 유저의 XP값을 입력한 숫자로 바꿉니다.', inline=False)
         embed.add_field(name='리워드 [필요한-레벨] [역할-이름]', value='해당 레벨을 도달할 때 받을 역할 리워드를 설정합니다.', inline=False)

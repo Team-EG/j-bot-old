@@ -28,7 +28,7 @@ class Talk(commands.Cog):
         embed.add_field(name='들어와있는 서버수', value=f'{servers}개', inline=False)
         embed.add_field(name='같이 있는 유저수', value=f'{users}명', inline=False)
         embed.add_field(name='서버 OS', value=f'{platform.platform()}', inline=False)
-        embed.add_field(name='버그 신고는?', value='eunwoo1104#9600으로 DM 보내주세요!', inline=False)
+        embed.add_field(name='제이봇 커뮤니티', value='https://discord.gg/nJuW3Xs', inline=False)
 
         await ctx.send(embed=embed)
 
@@ -64,6 +64,21 @@ class Talk(commands.Cog):
                      '아아아무말',
                      '아아아아무말',
                      '말무아']
+        await ctx.send(f'{random.choice(responses)}')
+
+    @commands.command()
+    async def 소라고동님(self, ctx):
+        responses = ['안 돼.',
+                     '다시 한 번 물어봐.',
+                     '그럼.',
+                     'ㅇㅇ',
+                     '언젠가는.',
+                     '몰라.',
+                     '~~아 모르겠다 ㅌㅌ~~',
+                     '안 돼.',
+                     '안 돼.',
+                     '안 돼.',
+                     '오류 - `대답을 할 수 없습니다.`']
         await ctx.send(f'{random.choice(responses)}')
 
     @commands.command()

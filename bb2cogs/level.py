@@ -248,6 +248,10 @@ class Level(commands.Cog):
                         else:
                             return
                     else:
+                        xp_data[author_id]["spam_count"] = 0
+                        xp_data[author_id]["last_spam"] = int(spamtimer)
+                        with open(f"level/{guild_id}/xp.json", "w") as s:
+                            json.dump(xp_data, s, indent=4)
                         return
                     xp_data[author_id]["spam_count"] += 1
                     xp_data[author_id]["last_spam"] = int(spamtimer)
