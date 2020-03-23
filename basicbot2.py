@@ -1,4 +1,4 @@
-# 제이봇 소스코드 (2020.02.09 업데이트) by eunwoo1104#9600(a.k.a. Jeb Kerman @ KSP 한국 포럼)
+# 제이봇 소스코드 (2020.03.16 업데이트) by eunwoo1104#9600(a.k.a. Jeb Kerman @ KSP 한국 포럼)
 # Python 3.8 + discord.py rewrite 1.3.2 사용
 # 명령어를 추가할때는 bb2cogs 폴더속 파이썬 파일을 수정하거나 새 파이썬 파일을 만들어서 bb2cogs 폴더안에 넣어주세요.
 # 일부 명령어는 cogs 에서는 작동하지 않을 수 있습니다.
@@ -22,8 +22,6 @@ print('제이봇 V1 | 도움이 필요하시면 help 라고 말해주세요.')
 
 # 콘솔 시스템
 def wait_for_command_input():
-    if token_data['load immediately'] is True:
-        return
     cmd = input('명령어: ')
     if cmd == '':
         wait_for_command_input()
@@ -63,7 +61,8 @@ no_cmd: 다음부터는 명령어를 입력하지 않고 바로 실행합니다.
         wait_for_command_input()
 
 
-wait_for_command_input()
+if token_data['load immediately'] is False:
+    wait_for_command_input()
 
 # 만약에 botsetup.json에 토큰 데이터가 없을 경우 입력하도록 만드는 코드
 if token_data['stabletoken'] == "":
