@@ -32,6 +32,15 @@ class Music(commands.Cog):
         guild_id = ctx.message.guild.id
         voice = get(self.client.voice_clients, guild=ctx.guild)
 
+        if voice is None:
+            channel = ctx.message.author.voice.channel
+
+            await channel.connect()
+
+            await ctx.send(f"`{channel}`에 들어왔어요!")
+
+        voice = get(self.client.voice_clients, guild=ctx.guild)
+
         try:
             with open(f"music/{guild_id}/queue.json", 'r') as f:
                 queue_data = json.load(f)
@@ -75,7 +84,7 @@ class Music(commands.Cog):
                 else:
                     queue_list.append(k)
             if len(queue_list) == 0 and not voice.is_playing():
-                del queue_data['playing']
+                os.remove(f'music/{guild_id}/queue.json')
                 return
             try:
                 if voice.is_paused():
@@ -87,7 +96,7 @@ class Music(commands.Cog):
                         song = ydl.extract_info(next_song, download=False)
                     voice.play(discord.FFmpegPCMAudio(song["url"], before_options=beforeArgs))
                     voice.source = discord.PCMVolumeTransformer(voice.source)
-                    voice.source.volume = 1
+                    voice.source.volume = 0.1
                     queue_data["playing"] = queue_data[play]["title"]
                     del queue_data[play]
                     with open(f"music/{guild_id}/queue.json", 'w') as f:
@@ -95,7 +104,7 @@ class Music(commands.Cog):
                     time.sleep(10)
             except ValueError:
                 if not voice.is_playing():
-                    del queue_data['playing']
+                    os.remove(f'music/{guild_id}/queue.json')
                     return
                 else:
                     pass
@@ -108,58 +117,52 @@ class Music(commands.Cog):
             time.sleep(1)
             queue()
 
-        if 'list=' in url:
-            await ctx.send('이 링크는 재생목록이네요... 재생이 취소되었습니다.')
-            return
+        try:
+            if 'list=' in url:
+                await ctx.send('이 링크는 재생목록이네요... 재생이 취소되었습니다.')
+                return
 
-        await ctx.send('잠시만 기다려주세요...')
+            await ctx.send('잠시만 기다려주세요...')
 
-        def dwld_url():
-            if not url.startswith("https://") or url.startswith("youtube.com") or url.startswith("youtu.be"):
-                song_search = " ".join(url)
-                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                    return ydl.extract_info(f"ytsearch1:{song_search}", download=False)['entries'][0]['webpage_url']
-            else:
-                return url
+            def dwld_url():
+                if not url.startswith("https://") or url.startswith("youtube.com") or url.startswith("youtu.be"):
+                    song_search = " ".join(url)
+                    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                        return ydl.extract_info(f"ytsearch1:{song_search}", download=False)['entries'][0]['webpage_url']
+                else:
+                    return url
 
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            song = ydl.extract_info(dwld_url(), download=False)
-            title = song.get('title', None)
+            with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                song = ydl.extract_info(dwld_url(), download=False)
+                title = song.get('title', None)
 
-        voice.play(discord.FFmpegPCMAudio(song["url"], before_options=beforeArgs))
-        voice.source = discord.PCMVolumeTransformer(voice.source)
-        voice.source.volume = 1
+            voice.play(discord.FFmpegPCMAudio(song["url"], before_options=beforeArgs))
+            voice.source = discord.PCMVolumeTransformer(voice.source)
+            voice.source.volume = 0.1
 
-        await ctx.send(f'`{title}`을(를) 재생할께요!')
+            await ctx.send(f'`{title}`을(를) 재생할께요!')
 
+            queue_data['playing'] = title
 
+            with open(f"music/{guild_id}/queue.json", 'w') as f:
+                json.dump(queue_data, f, indent=4)
 
-        queue_data['playing'] = title
-
-        with open(f"music/{guild_id}/queue.json", 'w') as f:
-            json.dump(queue_data, f, indent=4)
-
-        background_thread = Thread(target=queue)
-        background_thread.start()
+            background_thread = Thread(target=queue)
+            background_thread.start()
+        except discord.errors.ClientException:
+            await ctx.send('이미 재생중입니다. 대기 명령어를 대신 사용해주세요.')
 
     @commands.command(pass_context=True, aliases=['join', 'j'])
     async def 들어와(self, ctx):
         channel = ctx.message.author.voice.channel
         voice = get(self.client.voice_clients, guild=ctx.guild)
 
-        if voice and voice.is_connected():
-            await voice.move_to(channel)
-        else:
-            voice = await channel.connect()
+        if voice is not None:
+            return await voice.move_to(channel)
 
-        await voice.disconnect()
+        await channel.connect()
 
-        if voice and voice.is_connected():
-            await voice.move_to(channel)
-        else:
-            voice = await channel.connect()
-
-        await ctx.send("뮤직 채널에 들어왔어요! 어떤 음악을 재생할까요?")
+        await ctx.send(f"`{channel}`에 들어왔어요! 어떤 음악을 재생할까요?")
 
     @commands.command(pass_context=True, aliases=['leave', 'l'])
     async def 나가(self, ctx):
@@ -202,9 +205,9 @@ class Music(commands.Cog):
         guild_id = ctx.message.guild.id
         voice = get(self.client.voice_clients, guild=ctx.guild)
 
-        queue_infile = os.path.isdir(f"./music/{guild_id}/Queue")
+        queue_infile = os.path.isdir(f"./music/{guild_id}")
         if queue_infile is True:
-            shutil.rmtree(f"./music/{guild_id}/Queue")
+            shutil.rmtree(f"./music/{guild_id}")
 
         if voice and voice.is_playing():
             voice.stop()
@@ -213,8 +216,21 @@ class Music(commands.Cog):
             await ctx.send("지금 아무 음악도 재생하고 있지 않아요.")
 
     @commands.command(pass_context=True, aliases=['skip', 's'])
-    async def 스킵(self, ctx):
+    async def 스킵(self, ctx, music=None):
+        guild_id = ctx.message.guild.id
         voice = get(self.client.voice_clients, guild=ctx.guild)
+
+        if music is not None:
+            with open(f"music/{guild_id}/queue.json", 'r') as f:
+                queue_data = json.load(f)
+            if not queue_data[music]['req_by'] == str(ctx.author.id):
+                await ctx.send('남이 추가한 음악은 제거가 불가능합니다.')
+                return
+            del queue_data[music]
+            with open(f"music/{guild_id}/queue.json", 'w') as f:
+                json.dump(queue_data, f, indent=4)
+            await ctx.send("그 음악이 마음에 안드세요? 그러면 제거할께요.")
+            return
 
         if voice and voice.is_playing():
             voice.stop()
@@ -262,6 +278,7 @@ class Music(commands.Cog):
         queue_data[currenttime] = {}
         queue_data[currenttime]['url'] = str(dwld_url())
         queue_data[currenttime]['title'] = str(title)
+        queue_data[currenttime]['req_by'] = str(ctx.author.id)
 
         with open(f"music/{guild_id}/queue.json", 'w') as f:
             json.dump(queue_data, f, indent=4)
@@ -284,11 +301,19 @@ class Music(commands.Cog):
                 if key == 'playing':
                     pass
                 else:
-                    embed.add_field(name=f'대기리스트 {queue_count}', value=f'{queue_data[key]["title"]}', inline=False)
+                    embed.add_field(name=f'대기리스트 {queue_count}', value=f'{queue_data[key]["title"]}\n<@{queue_data[key]["req_by"]}>가 추가함 (스킵 코드: {key})', inline=False)
                     queue_count += 1
             await ctx.send(embed=embed)
         except KeyError:
             await ctx.send('대기중인 음악이 없습니다.')
+
+    @commands.command(pass_context=True, aliases=['v', 'volume'])
+    async def 볼륨(self, ctx, volume: int):
+        if ctx.voice_client is None:
+            return await ctx.send("먼저 뮤직 채널에 들어가주세요.")
+
+        ctx.voice_client.source.volume = volume / 100
+        await ctx.send(f"볼륨이 {volume}%로 조정되었습니다.")
 
 
 def setup(client):
