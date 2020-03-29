@@ -22,41 +22,28 @@ class ServerSetup(commands.Cog):
 
         bot_name = str(prefix_data["bot_name"])
 
-        default_prefix = str(prefix_data["default prefix"])
-
-        await guild.create_category(bot_name)
-        perms = discord.Permissions(send_messages=False)
-        await guild.create_role(name="뮤트", colour=discord.Colour(0xff0000), permissions=perms)
-        time.sleep(1)
-        name = bot_name
-        category = discord.utils.get(guild.categories, name=name)
-        await guild.create_text_channel('환영합니다', category=category)
-        await guild.create_text_channel('서버로그', category=category)
-        time.sleep(1)
-        channelname = '환영합니다'
-        channel = discord.utils.get(guild.text_channels, name=channelname)
-        await channel.send(f'{bot_name}을 이 서버에 초대해주셔서 감사합니다. 명령어에 대한 도움이 필요하다면 "{default_prefix}도움" 이라고 말해주세요!'
-                           '\nP.S. 이 채널은 환영메시지를 보내는 채널입니다!'
-                           f'\n채널을 변경하고 싶으시다면 {default_prefix}환영채널 [채널_이름] 이라고 말해주세요!')
         with open("data/guildsetup.json", "r") as f:
             data = json.load(f)
 
         data[guild_id] = {}
-        data[guild_id]['welcomechannel'] = '환영합니다'
-        data[guild_id]['greetings'] = '님이 서버에 들어오셨어요!'
-        data[guild_id]['goodbye'] = '님이 서버에서 나가셨어요...'
+        data[guild_id]['welcomechannel'] = None
+        data[guild_id]['greetings'] = None
+        data[guild_id]['goodbye'] = None
         data[guild_id]['greetpm'] = None
         data[guild_id]['prefixes'] = str(prefix_data["default prefix"])
         data[guild_id]['talk_prefixes'] = str(prefix_data["talk prefix"])
         data[guild_id]['use_globaldata'] = True
         data[guild_id]['use_level'] = True
         data[guild_id]['use_antispam'] = True
-        data[guild_id]['log_channel'] = '서버로그'
+        data[guild_id]['log_channel'] = None
         data[guild_id]['template'] = True
 
         with open("data/guildsetup.json", "w") as s:
             json.dump(data, s, indent=4)
 
+        perms = discord.Permissions(send_messages=False)
+        await guild.create_role(name="뮤트", colour=discord.Colour(0xff0000), permissions=perms)
+        time.sleep(1)
         mute_role = discord.utils.get(guild.roles, name='뮤트')
         for i in guild.text_channels:
             await i.set_permissions(mute_role, send_messages=False)

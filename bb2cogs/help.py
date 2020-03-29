@@ -48,7 +48,7 @@ class Help(commands.Cog):
         embed.add_field(name='계속재생', value='음악을 다시 재생합니다. (resume, r)', inline=False)
         embed.add_field(name="멈춰", value="음악을 멈춥니다. (stop)")
         embed.add_field(name='대기 [유튜브-url]', value='유튜브 url 음악을 대기 리스트에 넣습니다. (queue, q)', inline=False)
-        embed.add_field(name="스킵", value="재생중인 음악을 스킵합니다. (skip, s)")
+        embed.add_field(name="스킵 [스킵코드(옵션)]", value="재생중인 음악을 스킵합니다. 만약 스킵코드를 같이 입력하면 해당 음악을 대기리스트에서 제거합니다. (skip, s)")
         embed.add_field(name='대기리스트', value='현재 재생 대기중인 음악 리스트를 보여줍니다.', inline=False)
 
         await ctx.send("DM을 확인해주세요!")

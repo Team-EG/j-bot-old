@@ -9,17 +9,6 @@ from discord.ext import commands
 from discord.utils import get
 from discord import FFmpegPCMAudio
 
-'''except ValueError:
-    if not voice and voice.is_playing():
-        del queue_data['playing']
-        return
-    else:
-        pass
-except discord.errors.ClientException:
-    pass
-except FileNotFoundError:
-    return'''
-
 
 class Music(commands.Cog):
 

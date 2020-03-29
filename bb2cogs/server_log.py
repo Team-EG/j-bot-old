@@ -82,28 +82,35 @@ class Server_Log(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_update(self, before, after):
-        before_role = before.changed_roles
-        after_role = after.changed_roles
-        br_list = []
-        ar_list = []
-        for i in before_role:
-            br_mention = i.mention
-            br_list.append(br_mention)
-        for i in after_role:
-            ar_mention = i.mention
-            ar_list.append(ar_mention)
+        num = 0
+
         embed = discord.Embed(title='채널 업데이트됨', colour=discord.Color.lighter_grey())
         embed.set_author(name=after.name)
         if not before.name == after.name:
             embed.add_field(name='채널 이름', value=f'{before.name} -> {after.name}', inline=False)
-        if not br_list == ar_list:
+            num += 1
+        if not before.changed_roles == after.changed_roles:
+            before_role = before.changed_roles
+            after_role = after.changed_roles
+            br_list = []
+            ar_list = []
+            for i in before_role:
+                br_mention = i.mention
+                br_list.append(br_mention)
+            for i in after_role:
+                ar_mention = i.mention
+                ar_list.append(ar_mention)
+            if len(br_list) == len(ar_list):
+                return
             embed.add_field(name='역할 변경', value=f'{br_list} -> {ar_list}', inline=False)
+            num += 1
         if not before.category == after.category:
             embed.add_field(name='카테고리 변경', value=f'{before.category} -> {after.category}', inline=False)
-        else:
-            return
+            num += 1
 
         try:
+            if num == 0:
+                return
             with open("data/guildsetup.json", "r") as f:
                 data = json.load(f)
 
@@ -115,11 +122,13 @@ class Server_Log(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
+        num = 0
         embed = discord.Embed(title='유저 업데이트됨', colour=discord.Color.lighter_grey())
         embed.set_author(name=after.display_name, icon_url=after.avatar_url)
         if not before.display_name == after.display_name:
             embed.add_field(name='닉네임 변경 전', value=f'{before.display_name}', inline=False)
             embed.add_field(name='닉네임 변경 후', value=f'{after.display_name}', inline=False)
+            num += 1
         if not before.roles == after.roles:
             before_role = before.roles
             after_role = after.roles
@@ -135,9 +144,10 @@ class Server_Log(commands.Cog):
                 return
             embed.add_field(name='역할 변경 전', value=f'{br_list}', inline=False)
             embed.add_field(name='역할 변경 후', value=f'{ar_list}', inline=False)
-        else:
-            return
+            num += 1
         try:
+            if num == 0:
+                return
             with open("data/guildsetup.json", "r") as f:
                 data = json.load(f)
 
@@ -149,20 +159,24 @@ class Server_Log(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_update(self, before, after):
+        num = 0
         embed = discord.Embed(title='서버 업데이트됨', colour=discord.Color.lighter_grey())
         embed.set_author(name=after.name, icon_url=after.icon_url)
         if not before.name == after.name:
             embed.add_field(name='서버 이름', value=f'{before.name} -> {after.name}', inline=False)
+            num += 1
         if not before.region == after.region:
             embed.add_field(name='서버 지역', value=f'{before.region} -> {after.region}', inline=False)
+            num += 1
         if not before.verification_level == after.verification_level:
             embed.add_field(name='서버 보안 수준', value=f'{before.verification_level} -> {after.verification_level}', inline=False)
+            num += 1
         if not before.owner_id == after.owner_id:
             embed.add_field(name='서버 소유자', value=f'{before.owner.display_name} -> {after.owner.mention}', inline=False)
-        else:
-            return
-
+            num += 1
         try:
+            if num == 0:
+                return
             with open("data/guildsetup.json", "r") as f:
                 data = json.load(f)
 
@@ -239,17 +253,19 @@ class Server_Log(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_update(self, before, after):
+        num = 0
         embed = discord.Embed(title='역할 업데이트됨', colour=discord.Color.lighter_grey())
         embed.set_author(name=after.guild.name, icon_url=after.guild.icon_url)
         if not before.name == after.name:
             embed.add_field(name='역할 이름', value=f'{before.name} -> {after.mention}', inline=False)
+            num += 1
         if not before.colour == after.colour:
-            embed.add_field(name='역할 색깔', value=f'{before.colour} -> {after.colour}',
-                            inline=False)
-        else:
-            return
+            embed.add_field(name='역할 색깔', value=f'{before.colour} -> {after.colour}', inline=False)
+            num += 1
 
         try:
+            if num == 0:
+                return
             with open("data/guildsetup.json", "r") as f:
                 data = json.load(f)
 
