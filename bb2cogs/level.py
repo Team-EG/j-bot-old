@@ -240,7 +240,11 @@ class Level(commands.Cog):
                 timepassed = int(currenttime) - int(xp_data[author_id]["last_msg"])
                 spamtimepassed = int(spamtimer) - int(xp_data[author_id]["last_spam"])
                 if timepassed <= 100:
-                    if spamtimepassed <= 10:
+                    if message.channel.topic is None:
+                        pass
+                    elif "--NOSPAMCOUNT" in str(message.channel.topic):
+                        return
+                    if spamtimepassed <= 15:
                         with open("data/guildsetup.json", "r") as f:
                             data = json.load(f)
                         if data[guild_id]['use_antispam'] is True:
@@ -254,7 +258,6 @@ class Level(commands.Cog):
                             json.dump(xp_data, s, indent=4)
                         return
                     xp_data[author_id]["spam_count"] += 1
-                    xp_data[author_id]["last_spam"] = int(spamtimer)
 
                     if xp_data[author_id]["spam_count"] == 10:
                         await message.channel.send(f"{message.author.mention} 도배 경고")
@@ -275,7 +278,7 @@ class Level(commands.Cog):
                         if xp_data[author_id]["kick_count"] == 3:
                             await message.channel.send(f"{message.author}님이 추방 횟수 누적으로 밴되었습니다.")
                             del xp_data[author_id]
-                            await message.author.send('추방 횟수 누적으로 밴되었습니다.')
+                            await message.author.send('추방 횟수 누적으로 차단되었습니다.')
                             await message.author.send('https://www.youtube.com/watch?v=3vAC_3jGpKo')
                             await message.author.ban(reason=None)
                             return
@@ -293,6 +296,10 @@ class Level(commands.Cog):
                     pass
 
                 if message.content.startswith(f"{data[guild_id]['prefixes']}"):
+                    return
+                if message.channel.topic is None:
+                    pass
+                elif "--NOLEVEL" in str(message.channel.topic):
                     return
 
                 xp_data[author_id]["exp"] += random.choice(xp_choice)

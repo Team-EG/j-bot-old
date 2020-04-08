@@ -9,6 +9,7 @@ class Help(commands.Cog):
         print(f'{__name__} 로드 완료!')
 
     # embed 탬플릿 (앞에 #을 지우고 사용하세요)
+    # embed = discord.Embed(title='', description='', colour=discord.Color.red())
     # embed.add_field(name='', value='', inline=False)
 
     @commands.command(aliases=['help'])
@@ -31,6 +32,7 @@ class Help(commands.Cog):
         embed.add_field(name="관리자도움", value="관리자 전용 명령어 리스트를 DM으로 보냅니다.- 서버 관리자 이상만 사용 가능", inline=False)
         embed.add_field(name='KSP도움', value='KSP LMP 멀티 서버 관련 명령어 리스트를 출력합니다.', inline=False)
         embed.add_field(name='MD도움', value='마인더스트리 서버 관련 명령어 리스트를 출력합니다.', inline=False)
+        embed.add_field(name='놀이도움', value='놀이 기능 관련 명령어 리스트를 출력합니다.', inline=False)
 
         await ctx.send("DM을 확인해주세요!")
 
@@ -44,6 +46,7 @@ class Help(commands.Cog):
         embed.add_field(name='들어와', value='봇이 보이스 서버에 들어오게 합니다. (join, j)', inline=False)
         embed.add_field(name="나가", value="봇이 보이스 서버에서 나가게 합니다. (leave, l)")
         embed.add_field(name="재생 [유튜브-url]", value="유튜브 url 음악을 재생합니다. (play, p)", inline=False)
+        embed.add_field(name='볼륨 [숫자(최대 100)]', value='볼륨을 조정합니다. (volume, v)', inline=False)
         embed.add_field(name="일시정지", value="음악을 일시정지합니다. (pause, ps)")
         embed.add_field(name='계속재생', value='음악을 다시 재생합니다. (resume, r)', inline=False)
         embed.add_field(name="멈춰", value="음악을 멈춥니다. (stop)")
@@ -60,6 +63,8 @@ class Help(commands.Cog):
     @commands.has_permissions(kick_members=True)
     async def 관리자도움(self, ctx):
         embed = discord.Embed(title='관리자 명령어 리스트', colour=discord.Color.red())
+        embed.add_field(name='역할추가 [유저-맨션-또는-ID] [역할이름]', value='해당 역할을 해당 유저에게 추가합니다.', inline=False)
+        embed.add_field(name='역할제거 [유저-맨션-또는-ID] [역할이름]', value='해당 유저의 해당 역할을 제거합니다.', inline=False)
         embed.add_field(name='경고 [유저-맨션-또는-ID] [이유]', value='해당 유저에게 경고를 추가합니다.', inline=False)
         embed.add_field(name='경고삭제 [유저-맨션-또는-ID] [경고-번호]', value='해당 경고를 삭제합니다.', inline=False)
         embed.add_field(name='추방 [유저-맨션-또는-ID] [이유]', value='해당 유저를 추방합니다.', inline=False)
@@ -82,6 +87,7 @@ class Help(commands.Cog):
         embed.add_field(name='DM인사말 [DM환영인사말]', value='새 유저가 들어오면 DM으로 보낼 인사말을 설정합니다.', inline=False)
         embed.add_field(name='환영채널 [채널이름-#없이]', value='환영 채널을 설정합니다.', inline=False)
         embed.add_field(name='로그채널 [채널이름-#없이]', value='로그 채널을 설정합니다.', inline=False)
+        embed.add_field(name='공지채널 [채널이름-#없이]', value='공지 채널을 설정합니다.', inline=False)
         embed.add_field(name='서버설정', value='현재 서버 설정을 출력합니다.', inline=False)
         embed.add_field(name='설정리셋', value='서버 설정을 리셋합니다.', inline=False)
 
@@ -93,7 +99,15 @@ class Help(commands.Cog):
 
     @commands.command()
     async def 대화도움(self, ctx):
-        await ctx.send('해당 기능은 코드 문제로 삭제되었습니다. 나중에 코드 재작성후 다시 부활시킬 예정입니다.')
+        embed = discord.Embed(title='대화 기능 명령어 리스트', colour=discord.Color.red())
+        embed.add_field(name='[대화봇_프리픽스] [아무말]', value='대화봇 기능입니다.')
+        embed.add_field(name='학습 [내용] [대답]',
+                        value='내용을 말하면 출력할 대화를 저장합니다. (주의! [내용]은 띄어쓰기 없이 입력하세요! 욕설 등 사용시 예고없이 삭제합니다.)', inline=False)
+        embed.add_field(name='삭제 [내용]', value='[내용]을 대화봇 데이터베이스에서 삭제합니다.')
+
+        await ctx.send("DM을 확인해주세요!")
+
+        await ctx.author.send(embed=embed)
 
     @commands.command()
     async def KSP도움(self, ctx):
@@ -109,6 +123,23 @@ class Help(commands.Cog):
     async def MD도움(self, ctx):
         embed = discord.Embed(title='마인더스트리 서버 명령어 리스트', colour=discord.Color.red())
         embed.add_field(name='MD서버정보 [주소] [포트]', value='마인더스트리 서버 정보를 출력합니다.')
+
+        await ctx.send("DM을 확인해주세요!")
+
+        await ctx.author.send(embed=embed)
+
+    @commands.command()
+    async def 놀이도움(self, ctx):
+        embed = discord.Embed(title='놀이 명령어 리스트', colour=discord.Color.red())
+        embed.add_field(name='계정생성', value='계정을 생성합니다.', inline=False)
+        embed.add_field(name='지갑', value='지갑을 보여줍니다.', inline=False)
+        embed.add_field(name='알바', value='돈을 얻을 수 있는 명령어입니다. (하루 1번)', inline=False)
+        embed.add_field(name='가즈아 [돈 액수]', value='도박을 합니다.', inline=False)
+        embed.add_field(name='한강가즈아', value='~~도박이나 주식 투자에 실패를 하셨으면~~ 계정을 삭제합니다.', inline=False)
+        embed.add_field(name='차트', value='주식 리스트를 보여줍니다.', inline=False)
+        embed.add_field(name='매수 [주식 이름] [개수]', value='해당 주식을 해당 개수 만큼 구입합니다.', inline=False)
+        embed.add_field(name='매도', value='해당 주식을 해당 개수 만큼 판매합니다.', inline=False)
+        embed.add_field(name='그래프 [주식 이름]', value='해당 주식 그래프를 출력합니다.', inline=False)
 
         await ctx.send("DM을 확인해주세요!")
 

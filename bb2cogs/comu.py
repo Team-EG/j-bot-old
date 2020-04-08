@@ -17,6 +17,65 @@ class Example(commands.Cog):
     # embed.add_field(name='', value='', inline=False)
 
     @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def 강제삭제(self, ctx, usr_id, question=None, *, answer=None):
+        author_id = str(usr_id)
+        guild_id = str(ctx.guild.id)
+        question = question.upper()
+        answer = str(answer)
+        # 길드 전용 데이터베이스를 로드할건지 모든 서버에 연결된 데이터베이스에 연결할건지 결정
+        with open("data/guildsetup.json", "r") as f:
+            data = json.load(f)
+            if data[guild_id]['use_globaldata'] is True:
+                with open(f"data/global/data.json", "r") as a:
+                    qna_data = json.load(a)
+                with open(f"data/global/answer_by.json", "r") as b:
+                    answer_by = json.load(b)
+                if not ctx.author.id == 288302173912170497:
+                    return
+            else:
+                with open(f"data/guild_data/{guild_id}/data.json", "r") as a:
+                    qna_data = json.load(a)
+                with open(f"data/guild_data/{guild_id}/answer_by.json", "r") as b:
+                    answer_by = json.load(b)
+        try:
+            answers = answer_by[question][author_id]
+            if len(answers) > 1:
+                if answer is None or answer == "" or answer == "None":
+                    await ctx.send('어... 답변을 여러개 등록하셨네요. 이중에서 하나를 선택해서 말해주세요.\n양식: [프리픽스] 삭제 [질문] [선택한-답변]')
+                    embed = discord.Embed(title='답변 리스트', description=f'{ctx.author.mention}')
+                    num = 1
+                    for i in answers:
+                        embed.add_field(name=f'{num}', value=f'{i}', inline=False)
+                        num += 1
+                    await ctx.send(embed=embed)
+                    return
+                else:
+                    qna_data[str(question)].remove(answer)
+                    answer_by[question][author_id].remove(answer)
+            else:
+                qna_data[str(question)].remove(''.join(answers))
+                del answer_by[question][author_id]
+                if len(qna_data[str(question)]) == 0:
+                    del qna_data[str(question)]
+                    del answer_by[question]
+            with open("data/guildsetup.json", "r") as f:
+                data = json.load(f)
+                if data[guild_id]['use_globaldata'] is True:
+                    with open(f"data/global/data.json", "w") as s:
+                        json.dump(qna_data, s, indent=4)
+                    with open(f"data/global/answer_by.json", "w") as st:
+                        json.dump(answer_by, st, indent=4)
+                else:
+                    with open(f"data/guild_data/{guild_id}/data.json", "w") as s:
+                        json.dump(qna_data, s, indent=4)
+                    with open(f"data/guild_data/{guild_id}/answer_by.json", "w") as st:
+                        json.dump(answer_by, st, indent=4)
+            await ctx.send(f'{question}에 등록하신 질문을 삭제했어요')
+        except KeyError:
+            await ctx.send("그 질문을 못 찾았어요.")
+
+    @commands.command()
     async def 삭제(self, ctx, question=None, *, answer=None):
         author_id = str(ctx.author.id)
         guild_id = str(ctx.guild.id)
@@ -176,12 +235,12 @@ class Example(commands.Cog):
 
         with open(f"data/guildsetup.json", "r") as f:
             setup_data = json.load(f)
-        if f"{setup_data[guild_id]['talk_prefixes']}" == "":
+        if f"{setup_data[guild_id]['talk_prefixes']}" == "" or f"{setup_data[guild_id]['talk_prefixes']}" == "None" or f"{setup_data[guild_id]['talk_prefixes']}" is None:
             return
 
         elif message.content.startswith(f"{setup_data[guild_id]['talk_prefixes']}"):
             question = str(message.content)
-            question = question.lstrip(f"{setup_data[guild_id]['talk_prefixes']}")
+            question = question[len(setup_data[guild_id]['talk_prefixes']):]
             question = question.rstrip('?')
             question = question.rstrip('는?')
             question = question.rstrip('은?')
@@ -218,9 +277,9 @@ class Example(commands.Cog):
                 if choice in v:
                     answer_author_id = k
                     answer_author = get(self.client.get_all_members(), id=int(answer_author_id))
-            answer_author = str(answer_author)[:-5]
+            answer_author = str(answer_author.name)
             await message.channel.send(f"{choice}\n`by {answer_author}`")
-        except FileNotFoundError:
+        except KeyError:
             responses = ['...?',
                          '그게 뭐죠? 먹는건가요?',
                          '음...',

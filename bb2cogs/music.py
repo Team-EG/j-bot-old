@@ -141,6 +141,16 @@ class Music(commands.Cog):
         except discord.errors.ClientException:
             await ctx.send('이미 재생중입니다. 대기 명령어를 대신 사용해주세요.')
 
+    @commands.command(pass_context=True)
+    async def direct재생(self, ctx, *, url:str):
+        await ctx.send('준비중')
+        beforeArgs = "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"
+        voice = get(self.client.voice_clients, guild=ctx.guild)
+        voice.play(discord.FFmpegPCMAudio(url, before_options=beforeArgs))
+        voice.source = discord.PCMVolumeTransformer(voice.source)
+        voice.source.volume = 1
+        await ctx.send('재생합니다')
+
     @commands.command(pass_context=True, aliases=['join', 'j'])
     async def 들어와(self, ctx):
         channel = ctx.message.author.voice.channel

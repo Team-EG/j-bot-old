@@ -36,6 +36,7 @@ class ServerSetup(commands.Cog):
         data[guild_id]['use_level'] = True
         data[guild_id]['use_antispam'] = True
         data[guild_id]['log_channel'] = None
+        data[guild_id]['announcement'] = None
         data[guild_id]['template'] = True
 
         with open("data/guildsetup.json", "w") as s:
@@ -297,6 +298,30 @@ class ServerSetup(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
+    async def 공지채널(self, ctx, *, channel=None):
+        if ctx.guild is None:
+            return
+        guild_id = str(ctx.guild.id)
+        if channel is None:
+            await ctx.send('뒤에 [사용중지/{채널 이름}]중 하나를 입력해주세요.')
+        elif channel == '사용중지':
+            with open("data/guildsetup.json", "r") as f:
+                greets = json.load(f)
+            greets[guild_id]['announcement'] = None
+            with open("data/guildsetup.json", "w") as s:
+                json.dump(greets, s, indent=4)
+            await ctx.send(f'더이상 봇 공지를 출력하지 않습니다.')
+        else:
+            channel = discord.utils.get(ctx.guild.text_channels, name=channel)
+            with open("data/guildsetup.json", "r") as f:
+                greets = json.load(f)
+            greets[guild_id]['announcement'] = str(channel)
+            with open("data/guildsetup.json", "w") as s:
+                json.dump(greets, s, indent=4)
+            await ctx.send(f'공지 채널이 {channel.mention}(으)로 변경되었습니다.')
+
+    @commands.command()
+    @commands.has_permissions(ban_members=True)
     async def 서버설정(self, ctx):
         if ctx.guild is None:
             return
@@ -304,16 +329,17 @@ class ServerSetup(commands.Cog):
         with open("data/guildsetup.json", "r") as f:
             data = json.load(f)
         embed = discord.Embed(title='서버 설정', colour=discord.Color.red())
-        embed.add_field(name='환영채널', value=f"{data[guild_id]['welcomechannel']}")
+        embed.add_field(name='환영채널', value=f"{data[guild_id]['welcomechannel']}", inline=False)
         embed.add_field(name='인사말', value=f"{data[guild_id]['greetings']}", inline=False)
-        embed.add_field(name='작별인사', value=f"{data[guild_id]['goodbye']}")
+        embed.add_field(name='작별인사', value=f"{data[guild_id]['goodbye']}", inline=False)
         embed.add_field(name='DM 인사말', value=f"{data[guild_id]['greetpm']}", inline=False)
-        embed.add_field(name='프리픽스', value=f"{data[guild_id]['prefixes']}")
+        embed.add_field(name='프리픽스', value=f"{data[guild_id]['prefixes']}", inline=False)
         embed.add_field(name='대화 프리픽스', value=f"{data[guild_id]['talk_prefixes']}", inline=False)
-        embed.add_field(name='모든 서버와 동기화된 대화 데이터베이스를 사용하나요?', value=f"{data[guild_id]['use_globaldata']}")
+        embed.add_field(name='모든 서버와 동기화된 대화 데이터베이스를 사용하나요?', value=f"{data[guild_id]['use_globaldata']}", inline=False)
         embed.add_field(name='레벨 기능을 사용하나요?', value=f"{data[guild_id]['use_level']}", inline=False)
-        embed.add_field(name='도배 방지 기능을 사용하나요?', value=f"{data[guild_id]['use_antispam']}")
+        embed.add_field(name='도배 방지 기능을 사용하나요?', value=f"{data[guild_id]['use_antispam']}", inline=False)
         embed.add_field(name='로그 출력 채널', value=f"{data[guild_id]['log_channel']}", inline=False)
+        embed.add_field(name='봇 공지 채널', value=f"{data[guild_id]['announcement']}", inline=False)
 
         await ctx.send(embed=embed)
 
@@ -340,6 +366,7 @@ class ServerSetup(commands.Cog):
         data[guild_id]['use_level'] = True
         data[guild_id]['use_antispam'] = True
         data[guild_id]['log_channel'] = '서버로그'
+        data[guild_id]['announcement'] = None
         data[guild_id]['template'] = True
         with open("data/guildsetup.json", "w") as s:
             json.dump(data, s, indent=4)

@@ -2,6 +2,7 @@ import discord
 import random
 import json
 import platform
+import youtube_dl
 from discord.ext import commands
 from time import strftime, localtime
 
@@ -23,7 +24,7 @@ class Talk(commands.Cog):
     async def 정보(self, ctx):
         servers = len(self.client.guilds)
         users = len(set(self.client.get_all_members()))
-        embed = discord.Embed(title='제이봇', description='by eunwoo1104#9600, V1 / R 2020-03-16',
+        embed = discord.Embed(title='제이봇', description='by eunwoo1104#9600 & GPM567#3006, V1 / R 2020-04-07',
                               colour=discord.Color.red())
         embed.add_field(name='들어와있는 서버수', value=f'{servers}개', inline=False)
         embed.add_field(name='같이 있는 유저수', value=f'{users}명', inline=False)
@@ -124,19 +125,31 @@ class Talk(commands.Cog):
 
     @commands.command(pass_context=True)
     async def 유튜브검색(self, ctx, *, search=None):
-        result = search.replace(" ", "+")
-        embed = discord.Embed(title="유튜브 검색 결과", description=f"'{search}'의 검색 결과입니다.", colour=discord.Color.red(),
-                              url=f"https://www.youtube.com/results?search_query={result}")
-        embed.set_thumbnail(url="https://www.youtube.com/yts/img/yt_1200-vflhSIVnY.png")
-        await ctx.send(embed=embed)
+        await ctx.send("검색중입니다.")
+        try:
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'quiet': True
+            }
+            song_search = " ".join(search)
+            with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                result = ydl.extract_info(f"ytsearch1:{song_search}", download=False)['entries'][0]['webpage_url']
+            await ctx.send(str(result))
+        except youtube_dl.DownloadError:
+            await ctx.send("검색에 실패했습니다...\n혹시 모르니까 여기라도 확인해보세요.")
+            result = search.replace(" ", "+")
+            embed = discord.Embed(title="유튜브 검색 결과", description=f"'{search}'의 검색 결과입니다.", colour=discord.Color.red(),
+                                  url=f"https://www.youtube.com/results?search_query={result}")
+            embed.set_thumbnail(url="https://www.youtube.com/yts/img/yt_1200-vflhSIVnY.png")
+            await ctx.send(embed=embed)
 
     @commands.command()
     async def 서버정보(self, ctx):
-        roles = ctx.guild.roles
+        """roles = ctx.guild.roles
         rm_list = []
         for i in roles:
             roles_mention = i.mention
-            rm_list.append(roles_mention)
+            rm_list.append(roles_mention)"""
         embed = discord.Embed(title='서버정보', colour=discord.Color.red())
         embed.set_author(name=f'{ctx.guild.name}', icon_url=ctx.guild.icon_url)
         embed.add_field(name='소유자', value=f'{ctx.guild.owner.mention}', inline=False)
@@ -144,7 +157,7 @@ class Talk(commands.Cog):
         embed.add_field(name='서버가 생성된 날짜', value=f'{ctx.guild.created_at.strftime("%Y-%m-%d %I:%M:%S %p")}',
                         inline=False)
         embed.add_field(name='역할수', value=str(len(ctx.guild.roles)) + '개', inline=False)
-        embed.add_field(name='역할 리스트', value=f'{rm_list}', inline=False)
+        """embed.add_field(name='역할 리스트', value=f'{rm_list}', inline=False)"""
         embed.add_field(name='서버 위치', value=f'{ctx.guild.region}', inline=False)
         await ctx.send(embed=embed)
 

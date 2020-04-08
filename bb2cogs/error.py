@@ -15,8 +15,8 @@ class Error(commands.Cog):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send('무언가 빠뜨린 것이 있어요.')
         # 없는 명령어 감지시 실행
-        elif isinstance(error, commands.CommandNotFound):
-            await ctx.send(f'"{ctx.message.content}"는 없는 명령어 입니다.')
+        #elif isinstance(error, commands.CommandNotFound):
+        #    await ctx.send(f'"{ctx.message.content}"는 없는 명령어 입니다.')
         # 권한이 없을 경우 실행
         elif isinstance(error, commands.MissingPermissions):
             await ctx.send('어... 합필이면... 잘 알아두세요. 당신은 권한이 읎어요.')

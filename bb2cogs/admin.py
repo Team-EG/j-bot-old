@@ -46,7 +46,7 @@ class Admin(commands.Cog):
         await member.ban(reason=reason)
 
     @commands.command(pass_context=True)
-    @commands.has_permissions(kick_members=True)
+    @commands.has_permissions(manage_messages=True)
     async def 정리(self, ctx, amount: int):
         if amount >= 100:
             await ctx.send('오류 방지를 위해 100개 이상의 메시지는 지울 수 없습니다.')
@@ -73,6 +73,20 @@ class Admin(commands.Cog):
         mute = discord.utils.get(ctx.guild.roles, name='뮤트')
         await member.remove_roles(mute)
         await ctx.send(f'{member.mention}님을 뮤트 해제했습니다.')
+
+    @commands.command()
+    @commands.has_permissions(manage_roles=True)
+    async def 역할추가(self, ctx, member: discord.Member, *, role):
+        role = discord.utils.get(ctx.guild.roles, name=str(role))
+        await member.add_roles(role)
+        await ctx.send(f'{member.mention}님에게 `{role.name}` 역할을 추가했습니다.')
+
+    @commands.command()
+    @commands.has_permissions(manage_roles=True)
+    async def 역할제거(self, ctx, member: discord.Member, *, role):
+        role = discord.utils.get(ctx.guild.roles, name=str(role))
+        await member.add_roles(role)
+        await ctx.send(f'{member.mention}님의 `{role.name}` 역할을 제거했습니다.')
 
     @commands.command()
     @commands.has_permissions(kick_members=True)
@@ -177,7 +191,6 @@ class Admin(commands.Cog):
             json.dump(warn_data, s, indent=4)
 
         await ctx.send('경고가 삭제되었습니다.')
-
 
 
 def setup(client):
