@@ -1,1 +1,30 @@
-{}
+{
+    "288302173912170497": {
+        "money": 1250,
+        "alba": "20200408",
+        "\ud300EG": {
+            "amount": 1,
+            "bought_price": 1000,
+            "sold_price": 0
+        },
+        "OurTube": {
+            "amount": 3,
+            "bought_price": 3000,
+            "sold_price": 0
+        }
+    },
+    "665450122926096395": {
+        "money": 42050,
+        "alba": "20200408",
+        "OurTube": {
+            "amount": 1006008,
+            "bought_price": 278658000,
+            "sold_price": 0
+        },
+        "\ud300EG": {
+            "amount": 554000,
+            "bought_price": 721308000,
+            "sold_price": 0
+        }
+    }
+}
