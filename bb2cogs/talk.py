@@ -3,8 +3,8 @@ import random
 import json
 import platform
 import youtube_dl
+import datetime
 from discord.ext import commands
-from time import strftime, localtime
 
 
 class Talk(commands.Cog):
@@ -22,14 +22,22 @@ class Talk(commands.Cog):
 
     @commands.command(pass_context=True)
     async def 정보(self, ctx):
+        def get_uptime():
+            with open('botsetup.json', 'r') as f:
+                token_data = json.load(f)
+            time_now = datetime.datetime.strftime(datetime.datetime.today(), "%Y-%m-%d %H:%M:%S")
+            bot_uptime = datetime.datetime.strptime(time_now, "%Y-%m-%d %H:%M:%S") - datetime.datetime.strptime(token_data["starttime"], "%Y-%m-%d %H:%M:%S")
+            return bot_uptime
         servers = len(self.client.guilds)
         users = len(set(self.client.get_all_members()))
+        server_uptime = get_uptime()
         embed = discord.Embed(title='제이봇', description='by eunwoo1104#9600 & GPM567#3006, V1 / R 2020-04-07',
                               colour=discord.Color.red())
         embed.add_field(name='들어와있는 서버수', value=f'{servers}개', inline=False)
         embed.add_field(name='같이 있는 유저수', value=f'{users}명', inline=False)
         embed.add_field(name='서버 OS', value=f'{platform.platform()}', inline=False)
-        embed.add_field(name='제이봇 커뮤니티', value='https://discord.gg/nJuW3Xs', inline=False)
+        embed.add_field(name='업타임', value=f'{server_uptime}', inline=False)
+        embed.add_field(name='Team EG 디스코드', value='[여기를 클릭해보세요!](https://discord.gg/gqJBhar)', inline=False)
 
         await ctx.send(embed=embed)
 
@@ -145,21 +153,48 @@ class Talk(commands.Cog):
 
     @commands.command()
     async def 서버정보(self, ctx):
-        """roles = ctx.guild.roles
-        rm_list = []
-        for i in roles:
-            roles_mention = i.mention
-            rm_list.append(roles_mention)"""
+        roles = ctx.guild.roles
         embed = discord.Embed(title='서버정보', colour=discord.Color.red())
         embed.set_author(name=f'{ctx.guild.name}', icon_url=ctx.guild.icon_url)
+        embed.set_thumbnail(url=ctx.guild.icon_url)
         embed.add_field(name='소유자', value=f'{ctx.guild.owner.mention}', inline=False)
         embed.add_field(name='유저수', value=f'{ctx.guild.member_count}명', inline=False)
         embed.add_field(name='서버가 생성된 날짜', value=f'{ctx.guild.created_at.strftime("%Y-%m-%d %I:%M:%S %p")}',
                         inline=False)
+        embed.add_field(name="채널수", value=f"채팅 채널 {str(len(ctx.guild.text_channels))}개\n음성 채널 {str(len(ctx.guild.voice_channels))}개\n카테고리 {str(len(ctx.guild.categories))}개", inline=False)
+        embed.add_field(name="서버 부스트 레벨", value=str(ctx.guild.premium_tier) + '개', inline=False)
+        embed.add_field(name="서버 부스트 수", value=str(ctx.guild.premium_subscription_count) + '개', inline=False)
         embed.add_field(name='역할수', value=str(len(ctx.guild.roles)) + '개', inline=False)
-        """embed.add_field(name='역할 리스트', value=f'{rm_list}', inline=False)"""
+        embed.add_field(name='서버 최고 역할', value=f'{roles[-1].mention}', inline=False)
         embed.add_field(name='서버 위치', value=f'{ctx.guild.region}', inline=False)
         await ctx.send(embed=embed)
+        
+    @commands.command()
+    async def 랜덤(self, ctx, c1, c2):
+        choices = [c1, c2]
+        await ctx.send(random.choice(choices))
+        
+    @commands.command()
+    async def 랜덤수(self, ctx, start: int, stop: int):
+        try:
+            await ctx.send(random.randint(start, stop))
+        except:
+            await ctx.send("올바른 정수를 입력해주세요.")
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if ":gulag:" in message.content.lower():
+            gulag = self.client.get_emoji(658622959786917908)  # 굴라크 이모지 코드, 귀찮으면 이모지 서버 들어오기 (https://discord.gg/URm4dez)
+            await message.add_reaction(gulag)
+        if ":lowgul:" in message.content.lower():
+            gulag = self.client.get_emoji(700183909006049300)  # 굴라크 이모지 코드, 귀찮으면 이모지 서버 들어오기 (https://discord.gg/URm4dez)
+            await message.add_reaction(gulag)
+
+    # 이스터에그
+    @commands.command()
+    async def 굴라크(self, ctx):
+        gulag = self.client.get_emoji(658622959786917908)  # 굴라크 이모지 코드, 귀찮으면 이모지 서버 들어오기 (https://discord.gg/URm4dez)
+        await ctx.send(f'{gulag}')
 
 
 def setup(client):

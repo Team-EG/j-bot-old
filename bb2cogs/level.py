@@ -201,7 +201,7 @@ class Level(commands.Cog):
                 return
             if message.author.bot is True:
                 return
-        except:
+        except KeyError:
             return
         else:
             if message.content.startswith(""):
@@ -310,7 +310,7 @@ class Level(commands.Cog):
                 with open(f"level/{guild_id}/xp.json", "w") as s:
                     json.dump(xp_data, s, indent=4)
 
-                lvl_up_req = 200 + 50 * xp_data[author_id]["lvl"] * xp_data[author_id]["lvl"]
+                lvl_up_req = 200 + 50 * xp_data[author_id]["lvl"] ** 2
 
                 if xp_data[author_id]["exp"] >= lvl_up_req:
                     xp_data[author_id]["lvl"] += 1
@@ -321,13 +321,15 @@ class Level(commands.Cog):
                     with open(f"level/{guild_id}/xp.json", "w") as a:
                         json.dump(xp_data, a, indent=4)
 
-                with open(f"level/{guild_id}/reward.json", 'r') as a:
-                    role = json.load(a)
                 try:
+                    with open(f"level/{guild_id}/reward.json", 'r') as a:
+                        role = json.load(a)
                     reward_role = role[xp_data[author_id]["lvl"]]
                     receive = discord.utils.get(message.guild.roles, name=str(reward_role))
                     await message.author.add_roles(receive)
                 except KeyError:
+                    pass
+                except FileNotFoundError:
                     pass
 
 

@@ -32,6 +32,23 @@ class Server_Log(commands.Cog):
             pass
 
     @commands.Cog.listener()
+    async def on_raw_bulk_message_delete(self, payload):
+        if len(payload.message_ids) == 1:
+            return
+        embed = discord.Embed(title='메시지 대량 삭제됨', colour=discord.Color.red())
+        embed.add_field(name='삭제된 메시지 개수', value=str(len(payload.message_ids)), inline=False)
+
+        try:
+            with open("data/guildsetup.json", "r") as f:
+                data = json.load(f)
+
+            channel = discord.utils.get(self.client.get_guild(payload.guild_id).text_channels, name=data[str(payload.guild_id)]['log_channel'])
+
+            await channel.send(embed=embed)
+        except:
+            pass
+
+    @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         if before.content == after.content:
             return

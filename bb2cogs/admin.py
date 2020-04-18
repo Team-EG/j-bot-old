@@ -3,6 +3,7 @@ import json
 import time
 import os
 import shutil
+import asyncio
 from time import localtime, strftime
 from discord.ext import commands
 
@@ -55,7 +56,7 @@ class Admin(commands.Cog):
         amount += 1
         for i in range(amount):
             await ctx.channel.purge(limit=amount)
-            await ctx.send(f'최근 {amount - 1}개 메시지를 지웠어요!')
+            await (await ctx.send(f'최근 {amount - 1}개 메시지를 지웠어요!\n`이 메시지는 5초 후 삭제됩니다.`')).delete(delay=5)
             return
 
     @commands.command()
@@ -191,6 +192,21 @@ class Admin(commands.Cog):
             json.dump(warn_data, s, indent=4)
 
         await ctx.send('경고가 삭제되었습니다.')
+
+    @commands.command()
+    @commands.has_permissions(manage_channels=True)
+    async def 슬로우모드(self, ctx, num: int, chan: discord.TextChannel = None):
+        if chan is None:
+            chan = ctx.message.channel
+        if num < 0:
+            await ctx.send("0보다 큰 수로 입력해주세요.")
+            return
+
+        await chan.edit(slowmode_delay=num)
+        if num == 0:
+            await ctx.send("슬로우모드를 껐어요!")
+            return
+        await ctx.send(f"{chan.mention}에 {num}초 슬로우모드를 걸었어요!")
 
 
 def setup(client):

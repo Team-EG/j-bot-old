@@ -8,8 +8,12 @@ class Announcement(commands.Cog):
         self.client = client
         print(f"{__name__} 로드 완료!")
 
+    # embed 탬플릿 (앞에 #을 지우고 사용하세요)
+    # embed = discord.Embed(title='', description='', colour=discord.Color.red())
+    # embed.add_field(name='', value='', inline=False)
+
     @commands.command()
-    async def 공지(self, ctx, *, ann):
+    async def 공지(self, ctx, t, *, ann):
         if not ctx.author.id == 288302173912170497:
             return
         with open("data/guildsetup.json", "r") as f:
@@ -20,17 +24,13 @@ class Announcement(commands.Cog):
                     v = data[k]["announcement"]
                     target_guild = self.client.get_guild(int(k))
                     target_channel = discord.utils.get(target_guild.text_channels, name=f'{v}')
-                    await target_channel.send(str(ann))
+                    embed = discord.Embed(title='제이봇 공지', colour=discord.Color.red())
+                    embed.set_footer(text=str(ctx.author), icon_url=ctx.author.avatar_url)
+                    embed.add_field(name=str(t), value=str(ann), inline=False)
+                    await target_channel.send(embed=embed)
             except KeyError:
                 pass
         await ctx.send("공지를 모두 보냈습니다!")
-
-    @commands.command()
-    async def 테스트(self, ctx, channel_name):
-        channel_list = ctx.guild.text_channels
-        for i in channel_list:
-            if channel_name in i.name:
-                print(i.id)
 
 
 def setup(client):

@@ -1,4 +1,5 @@
 import discord
+import json
 from discord.ext import commands
 
 
@@ -12,138 +13,62 @@ class Help(commands.Cog):
     # embed = discord.Embed(title='', description='', colour=discord.Color.red())
     # embed.add_field(name='', value='', inline=False)
 
-    @commands.command(aliases=['help'])
-    async def 도움(self, ctx):
-        embed = discord.Embed(title='명령어 리스트', description='!꼭 프리픽스를 앞에 붙히세요!', colour=discord.Color.red())
-        embed.add_field(name="도움", value="명령어 리스트를 보여줍니다. (help)", inline=False)
-        embed.add_field(name='네이버검색 [검색어]', value='초록창에 검색어를 대신 입력해줍니다.', inline=False)
-        embed.add_field(name='구글검색 [검색어]', value='구글 검색창에 검색어를 대신 입력해줍니다.', inline=False)
-        embed.add_field(name='나무위키 [검색어]', value='나무위키 검색창에 검색어를 대신 입력해줍니다.', inline=False)
-        embed.add_field(name='유튜브검색 [검색어]', value='유튜브 검색창에 검색어를 대신 입력해줍니다.', inline=False)
-        embed.add_field(name='레벨', value='자신의 채팅 레벨을 보여줍니다.', inline=False)
-        embed.add_field(name='정보', value='봇이 있는 서버의 수와 봇과 함꼐 있는 유저의 수를 보여줍니다.', inline=False)
-        embed.add_field(name="유저정보 [유저-맨션]", value="맨션한 유저의 정보를 봅니다. 유저를 맨션하지 않는 경우 자신의 정보를 보여줍니다.", inline=False)
-        embed.add_field(name='서버정보', value='현재 서버의 정보를 출력합니다.', inline=False)
-        embed.add_field(name='크레딧', value='이 봇을 만들면서 사용하거나 참고한 것들의 리스트가 적힌 사이트 주소를 출력합니다.', inline=False)
-        embed.add_field(name='소스코드', value='이 봇의 소스코드를 보여줍니다.', inline=False)
-        embed.add_field(name='누적경고', value='자신이 받은 경고들을 출력합니다.', inline=False)
-        embed.add_field(name='경고정보 [유저-맨션] [경고-번호]', value='해당 경고를 받은 이유를 출력합니다.', inline=False)
-        embed.add_field(name='뮤직도움', value='뮤직봇 기능에 대한 도움말을 출력합니다.', inline=False)
-        embed.add_field(name="관리자도움", value="관리자 전용 명령어 리스트를 DM으로 보냅니다.- 서버 관리자 이상만 사용 가능", inline=False)
-        embed.add_field(name='KSP도움', value='KSP LMP 멀티 서버 관련 명령어 리스트를 출력합니다.', inline=False)
-        embed.add_field(name='MD도움', value='마인더스트리 서버 관련 명령어 리스트를 출력합니다.', inline=False)
-        embed.add_field(name='놀이도움', value='놀이 기능 관련 명령어 리스트를 출력합니다.', inline=False)
-
-        await ctx.send("DM을 확인해주세요!")
-
-        await ctx.author.send(embed=embed)
-
-    # 뮤직봇 기능 도움 명령어 (DM으로 보내짐, embed 사용)
-    @commands.command()
-    async def 뮤직도움(self, ctx):
-        embed = discord.Embed(title='뮤직봇 기능 명령어 리스트', description='!꼭 프리픽스를 앞에 붙히세요!', colour=discord.Color.red())
-        embed.add_field(name="뮤직도움", value="뮤직봇 기능 명령어 리스트를 보여줍니다.")
-        embed.add_field(name='들어와', value='봇이 보이스 서버에 들어오게 합니다. (join, j)', inline=False)
-        embed.add_field(name="나가", value="봇이 보이스 서버에서 나가게 합니다. (leave, l)")
-        embed.add_field(name="재생 [유튜브-url]", value="유튜브 url 음악을 재생합니다. (play, p)", inline=False)
-        embed.add_field(name='볼륨 [숫자(최대 100)]', value='볼륨을 조정합니다. (volume, v)', inline=False)
-        embed.add_field(name="일시정지", value="음악을 일시정지합니다. (pause, ps)")
-        embed.add_field(name='계속재생', value='음악을 다시 재생합니다. (resume, r)', inline=False)
-        embed.add_field(name="멈춰", value="음악을 멈춥니다. (stop)")
-        embed.add_field(name='대기 [유튜브-url]', value='유튜브 url 음악을 대기 리스트에 넣습니다. (queue, q)', inline=False)
-        embed.add_field(name="스킵 [스킵코드(옵션)]", value="재생중인 음악을 스킵합니다. 만약 스킵코드를 같이 입력하면 해당 음악을 대기리스트에서 제거합니다. (skip, s)")
-        embed.add_field(name='대기리스트', value='현재 재생 대기중인 음악 리스트를 보여줍니다.', inline=False)
-
-        await ctx.send("DM을 확인해주세요!")
-
-        await ctx.author.send(embed=embed)
-
-    # 관리자 명령어 리스트 (DM으로 보내짐, embed 사용)
-    @commands.command()
-    @commands.has_permissions(kick_members=True)
-    async def 관리자도움(self, ctx):
-        embed = discord.Embed(title='관리자 명령어 리스트', colour=discord.Color.red())
-        embed.add_field(name='역할추가 [유저-맨션-또는-ID] [역할이름]', value='해당 역할을 해당 유저에게 추가합니다.', inline=False)
-        embed.add_field(name='역할제거 [유저-맨션-또는-ID] [역할이름]', value='해당 유저의 해당 역할을 제거합니다.', inline=False)
-        embed.add_field(name='경고 [유저-맨션-또는-ID] [이유]', value='해당 유저에게 경고를 추가합니다.', inline=False)
-        embed.add_field(name='경고삭제 [유저-맨션-또는-ID] [경고-번호]', value='해당 경고를 삭제합니다.', inline=False)
-        embed.add_field(name='추방 [유저-맨션-또는-ID] [이유]', value='해당 유저를 추방합니다.', inline=False)
-        embed.add_field(name='차단 [유저-맨션-또는-ID] [이유]', value='해당 유저를 차단합니다.', inline=False)
-        embed.add_field(name='뮤트 [유저-맨션-또는-ID] [이유]', value='해당 유저를 뮤트합니다.', inline=False)
-        embed.add_field(name='뮤트해제 [유저-맨션-또는-ID]', value='해당 유저를 뮤트 해제합니다.', inline=False)
-        embed.add_field(name='프리픽스교체 [프리픽스]', value='프리픽스를 교체합니다.\n주의! - 띄어쓰기가 필요한 경우 "[프리픽스]" (쌍따옴표 붙이기)로 해주세요!', inline=False)
-        embed.add_field(name='정리 [숫자]', value='숫자만큼의 채팅을 삭제합니다.', inline=False)
-        embed.add_field(name='XP리셋 [유저-맨션-혹은-ID]', value='해당 유저의 XP를 초기화합니다.', inline=False)
-        embed.add_field(name='XP입력 [유저-맨션-혹은-ID] [XP값]', value='해당 유저의 XP값을 입력한 숫자로 바꿉니다.', inline=False)
-        embed.add_field(name='리워드 [필요한-레벨] [역할-이름]', value='해당 레벨을 도달할 때 받을 역할 리워드를 설정합니다.', inline=False)
-        embed.add_field(name='리워드제거 [필요한-레벨]', value='설정한 역할 리워드를 제거합니다.', inline=False)
-        embed.add_field(name='도배리셋 [유저-맨션-혹은-ID]', value='해당 유저의 도배 기록을 리셋합니다.', inline=False)
-        embed.add_field(name='대화프픽 [프리픽스]', value='대화봇 기능용 프리픽스를 교체합니다.', inline=False)
-        embed.add_field(name='대화DB [동기화 또는 서버전용]', value='모든 서버와 동기화된 대화 데이터베이스 사용 여부를 설정합니다.', inline=False)
-        embed.add_field(name='레벨기능 [사용 또는 미사용]', value='레벨 기능 사용 여부를 설정합니다.', inline=False)
-        embed.add_field(name='도배방지 [사용 또는 미사용]', value='도배 방지 기능 사용 여부를 설정합니다.', inline=False)
-        embed.add_field(name='인사말 [환영인사말]', value='새 유저가 들어오면 환영 채널에 출력할 말을 설정합니다.', inline=False)
-        embed.add_field(name='작별인사 [작별인사말]', value='유저가 나가면 환열 채널에 출력할 말을 설정합니다.', inline=False)
-        embed.add_field(name='DM인사말 [DM환영인사말]', value='새 유저가 들어오면 DM으로 보낼 인사말을 설정합니다.', inline=False)
-        embed.add_field(name='환영채널 [채널이름-#없이]', value='환영 채널을 설정합니다.', inline=False)
-        embed.add_field(name='로그채널 [채널이름-#없이]', value='로그 채널을 설정합니다.', inline=False)
-        embed.add_field(name='공지채널 [채널이름-#없이]', value='공지 채널을 설정합니다.', inline=False)
-        embed.add_field(name='서버설정', value='현재 서버 설정을 출력합니다.', inline=False)
-        embed.add_field(name='설정리셋', value='서버 설정을 리셋합니다.', inline=False)
-
+    @commands.command(aliases=['help', '도움말'])
+    async def 도움(self, ctx, *, help_category=None):
         try:
-            await ctx.send("DM을 확인해주세요!")
-            await ctx.author.send(embed=embed)
+            guild_id = str(ctx.guild.id)
+        except AttributeError:
+            guild_id = None
+        with open("data/guildsetup.json", "r") as f:
+            data = json.load(f)
+        if help_category is None:
+            dir_to_help = "help/help.json"
+        else:
+            dir_to_help = f"help/{help_category}/help.json"
+        try:
+            with open(str(dir_to_help), 'r') as f:
+                help_list = json.load(f)
+        except FileNotFoundError:
+            await ctx.send("그 도움말을 못 찾았어요...")
+            return
+        if guild_id is not None:
+            guild_prefix = data[guild_id]["prefixes"]
+        else:
+            guild_prefix = '제이봇 '
+        embed = discord.Embed(title='명령어 리스트', description=f'서버 프리픽스: `{guild_prefix}`',
+                              colour=discord.Color.red())
+        for k in help_list.keys():
+            embed.add_field(name=str(k),
+                            value=f"{str(help_list[k]['desc'])}\n에일리어스: `{str(help_list[k]['aliases'])}`")
+        try:
+            await ctx.message.add_reaction(emoji='🇩')
+            await ctx.message.add_reaction(emoji='🇲')
         except:
-            await ctx.send("이 명령어는 관리자 전용입니다.")
-
-    @commands.command()
-    async def 대화도움(self, ctx):
-        embed = discord.Embed(title='대화 기능 명령어 리스트', colour=discord.Color.red())
-        embed.add_field(name='[대화봇_프리픽스] [아무말]', value='대화봇 기능입니다.')
-        embed.add_field(name='학습 [내용] [대답]',
-                        value='내용을 말하면 출력할 대화를 저장합니다. (주의! [내용]은 띄어쓰기 없이 입력하세요! 욕설 등 사용시 예고없이 삭제합니다.)', inline=False)
-        embed.add_field(name='삭제 [내용]', value='[내용]을 대화봇 데이터베이스에서 삭제합니다.')
-
-        await ctx.send("DM을 확인해주세요!")
-
+            pass
         await ctx.author.send(embed=embed)
 
     @commands.command()
-    async def KSP도움(self, ctx):
-        embed = discord.Embed(title='KSP LMP 서버 명령어 리스트', colour=discord.Color.red())
-        embed.add_field(name='KSP플레이어 [주소]', value='KSP 멀티 서버에 접속한 플레이어 리스트를 보여줍니다.')
-        embed.add_field(name='KSP서버정보 [주소]', value='KSP 멀티 서버의 정보를 보여줍니다.', inline=False)
-
-        await ctx.send("DM을 확인해주세요!")
-
-        await ctx.author.send(embed=embed)
-
-    @commands.command()
-    async def MD도움(self, ctx):
-        embed = discord.Embed(title='마인더스트리 서버 명령어 리스트', colour=discord.Color.red())
-        embed.add_field(name='MD서버정보 [주소] [포트]', value='마인더스트리 서버 정보를 출력합니다.')
-
-        await ctx.send("DM을 확인해주세요!")
-
-        await ctx.author.send(embed=embed)
-
-    @commands.command()
-    async def 놀이도움(self, ctx):
-        embed = discord.Embed(title='놀이 명령어 리스트', colour=discord.Color.red())
-        embed.add_field(name='계정생성', value='계정을 생성합니다.', inline=False)
-        embed.add_field(name='지갑', value='지갑을 보여줍니다.', inline=False)
-        embed.add_field(name='알바', value='돈을 얻을 수 있는 명령어입니다. (하루 1번)', inline=False)
-        embed.add_field(name='가즈아 [돈 액수]', value='도박을 합니다.', inline=False)
-        embed.add_field(name='한강가즈아', value='~~도박이나 주식 투자에 실패를 하셨으면~~ 계정을 삭제합니다.', inline=False)
-        embed.add_field(name='차트', value='주식 리스트를 보여줍니다.', inline=False)
-        embed.add_field(name='매수 [주식 이름] [개수]', value='해당 주식을 해당 개수 만큼 구입합니다.', inline=False)
-        embed.add_field(name='매도', value='해당 주식을 해당 개수 만큼 판매합니다.', inline=False)
-        embed.add_field(name='그래프 [주식 이름]', value='해당 주식 그래프를 출력합니다.', inline=False)
-
-        await ctx.send("DM을 확인해주세요!")
-
-        await ctx.author.send(embed=embed)
+    async def 도움추가(self, ctx, help_category, name=None, desc=None, aliases=None):
+        if not ctx.author.id == 288302173912170497:
+            return
+        if help_category == "None":
+            dir_to_help = "help/help.json"
+        else:
+            dir_to_help = f"help/{help_category}/help.json"
+        try:
+            with open(str(dir_to_help), 'r') as f:
+                help_list = json.load(f)
+        except FileNotFoundError:
+            await ctx.send("그 도움말을 못 찾았어요...")
+            return
+        if aliases is None:
+            aliases = "없음"
+        help_list[name] = {}
+        help_list[name]["desc"] = desc
+        help_list[name]["aliases"] = aliases
+        with open(str(dir_to_help), 'w') as f:
+            json.dump(help_list, f, indent=4)
+        await ctx.send(f"`{name}`은(는) `{desc}`라고 추가했습니다.")
 
 
 def setup(client):

