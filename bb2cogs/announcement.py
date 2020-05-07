@@ -25,7 +25,7 @@ class Announcement(commands.Cog):
                     target_guild = self.client.get_guild(int(k))
                     target_channel = discord.utils.get(target_guild.text_channels, name=f'{v}')
                     embed = discord.Embed(title='제이봇 공지', colour=discord.Color.red())
-                    embed.set_footer(text=str(ctx.author), icon_url=ctx.author.avatar_url)
+                    embed.set_footer(text=str(ctx.author.name), icon_url=ctx.author.avatar_url)
                     embed.add_field(name=str(t), value=str(ann), inline=False)
                     await target_channel.send(embed=embed)
             except KeyError:

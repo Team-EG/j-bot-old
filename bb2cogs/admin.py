@@ -34,15 +34,18 @@ class Admin(commands.Cog):
     @commands.command()
     @commands.has_permissions(kick_members=True)
     async def 추방(self, ctx, member: discord.Member, *, reason=None):
+        guild = ctx.guild
+        channel = guild.system_channel
+        create_invite = await channel.create_invite(max_age=0, max_uses=1, reason=f'{member} 재초대 코드')
         await ctx.send(f'{member}을(를) 추방했어요. (이유:{reason})')
-        await member.send(f'{ctx.guild}에서 추방되었습니다.')
+        await member.send(f'{ctx.guild}에서 추방되었습니다.\n사유: {reason}\n서버 초대 코드: {str(create_invite)}')
         await member.kick(reason=reason)
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
     async def 차단(self, ctx, member: discord.Member, *, reason=None):
         await ctx.send(f'{member}을(를) 차단했어요. (이유:{reason})')
-        await member.send(f'{ctx.guild}에서 차단되었습니다.')
+        await member.send(f'{ctx.guild}에서 차단되었습니다.\n사유: {reason}')
         await member.send('https://www.youtube.com/watch?v=3vAC_3jGpKo')  # 링크 열어보면 무슨 영상인지 알 수 있음 (이시국 주의)
         await member.ban(reason=reason)
 

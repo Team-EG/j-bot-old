@@ -401,6 +401,30 @@ class ServerSetup(commands.Cog):
         with open("data/guildsetup.json", "w") as s:
             json.dump(data, s, indent=4)
         await ctx.send('서버 설정이 초기화 되었습니다.')
+        
+    @commands.command()
+    async def force서버설정(self, ctx):
+        if not ctx.author.id == 288302173912170497:
+            return
+        if ctx.guild is None:
+            return
+        guild_id = str(ctx.guild.id)
+        with open("data/guildsetup.json", "r") as f:
+            data = json.load(f)
+        embed = discord.Embed(title='서버 설정', colour=discord.Color.red())
+        embed.add_field(name='환영채널', value=f"{data[guild_id]['welcomechannel']}", inline=False)
+        embed.add_field(name='인사말', value=f"{data[guild_id]['greetings']}", inline=False)
+        embed.add_field(name='작별인사', value=f"{data[guild_id]['goodbye']}", inline=False)
+        embed.add_field(name='DM 인사말', value=f"{data[guild_id]['greetpm']}", inline=False)
+        embed.add_field(name='프리픽스', value=f"{data[guild_id]['prefixes']}", inline=False)
+        embed.add_field(name='대화 프리픽스', value=f"{data[guild_id]['talk_prefixes']}", inline=False)
+        embed.add_field(name='모든 서버와 동기화된 대화 데이터베이스를 사용하나요?', value=f"{data[guild_id]['use_globaldata']}", inline=False)
+        embed.add_field(name='레벨 기능을 사용하나요?', value=f"{data[guild_id]['use_level']}", inline=False)
+        embed.add_field(name='도배 방지 기능을 사용하나요?', value=f"{data[guild_id]['use_antispam']}", inline=False)
+        embed.add_field(name='로그 출력 채널', value=f"{data[guild_id]['log_channel']}", inline=False)
+        embed.add_field(name='봇 공지 채널', value=f"{data[guild_id]['announcement']}", inline=False)
+
+        await ctx.send(embed=embed)
 
 
 def setup(client):

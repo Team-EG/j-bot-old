@@ -37,6 +37,7 @@ class Server_Log(commands.Cog):
             return
         embed = discord.Embed(title='메시지 대량 삭제됨', colour=discord.Color.red())
         embed.add_field(name='삭제된 메시지 개수', value=str(len(payload.message_ids)), inline=False)
+        embed.add_field(name='메시지가 삭제된 채널', value=f"<#{payload.channel_id}>", inline=False)
 
         try:
             with open("data/guildsetup.json", "r") as f:

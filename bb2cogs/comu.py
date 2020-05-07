@@ -277,7 +277,7 @@ class Example(commands.Cog):
                 if choice in v:
                     answer_author_id = k
                     answer_author = get(self.client.get_all_members(), id=int(answer_author_id))
-            answer_author = str(answer_author.name)
+            answer_author = str(answer_author)[:-5]
             await message.channel.send(f"{choice}\n`by {answer_author}`")
         except KeyError:
             responses = ['...?',

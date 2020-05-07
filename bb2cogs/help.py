@@ -12,15 +12,25 @@ class Help(commands.Cog):
     # embed 탬플릿 (앞에 #을 지우고 사용하세요)
     # embed = discord.Embed(title='', description='', colour=discord.Color.red())
     # embed.add_field(name='', value='', inline=False)
+    
+    """
+    async def cog_check(self, ctx):
+        if ctx.guild.id == 653865550157578251:
+            await ctx.send("이 서버에서는 해당 명령어를 사용할 수 없습니다.")
+            return False
+        else:
+            return True
+    """
 
     @commands.command(aliases=['help', '도움말'])
     async def 도움(self, ctx, *, help_category=None):
-        try:
-            guild_id = str(ctx.guild.id)
-        except AttributeError:
-            guild_id = None
         with open("data/guildsetup.json", "r") as f:
             data = json.load(f)
+        if ctx.guild is None:
+            pf = "제이봇 "
+        else:
+            guild_id = str(ctx.guild.id)
+            pf = data[guild_id]["prefixes"]
         if help_category is None:
             dir_to_help = "help/help.json"
         else:
@@ -31,12 +41,7 @@ class Help(commands.Cog):
         except FileNotFoundError:
             await ctx.send("그 도움말을 못 찾았어요...")
             return
-        if guild_id is not None:
-            guild_prefix = data[guild_id]["prefixes"]
-        else:
-            guild_prefix = '제이봇 '
-        embed = discord.Embed(title='명령어 리스트', description=f'서버 프리픽스: `{guild_prefix}`',
-                              colour=discord.Color.red())
+        embed = discord.Embed(title='명령어 리스트', description=f'서버 프리픽스: {pf}', colour=discord.Color.red())
         for k in help_list.keys():
             embed.add_field(name=str(k),
                             value=f"{str(help_list[k]['desc'])}\n에일리어스: `{str(help_list[k]['aliases'])}`")
@@ -69,6 +74,10 @@ class Help(commands.Cog):
         with open(str(dir_to_help), 'w') as f:
             json.dump(help_list, f, indent=4)
         await ctx.send(f"`{name}`은(는) `{desc}`라고 추가했습니다.")
+        
+    @commands.command()
+    async def hellothisisverification(self, ctx):
+        await ctx.send("eunwoo1104#9600")
 
 
 def setup(client):
