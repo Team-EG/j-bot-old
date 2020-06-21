@@ -1,0 +1,8 @@
+discord.py[voice]
+pynacl
+requests
+pydustry
+youtube-dl
+beautifulsoup4
+koreanbots
+matplotlib
